@@ -19,6 +19,12 @@ public static class Evaluator
         for (int i = 0; i < substrings.Length; i++)
         {
             substrings[i] = substrings[i].Trim();
+
+            if (substrings[i].Equals("-") && (substrings[i+1].Equals("(") ||
+                isVariable(substrings[i+1]) || (int.TryParse(substrings[i+1],out int convertedIntValue))))
+            {
+                throw new Exception(" Bad formula with unary operator found ! ");
+            }
             if (substrings[i].Equals("") || substrings[i].Equals("+")
                 || substrings[i].Equals("-") || substrings[i].Equals("/")
                 || substrings[i].Equals(")") || substrings[i].Equals("/")
@@ -138,8 +144,8 @@ public static class Evaluator
                         /// Step 3
                         /// If top of the operatorStack is either  "*" or "/"
                         /// applies the poppedOperator to the values
-                        if (operatorStack!=null && operatorStack.Count != 0
-                            &&( operatorStack.Peek().Equals("*") ||
+                        if (operatorStack != null && operatorStack.Count != 0
+                            && (operatorStack.Peek().Equals("*") ||
                             operatorStack.Peek().Equals("/")))
                         {
                             if (valueStack.Count >= 2)
@@ -167,20 +173,20 @@ public static class Evaluator
         }
 
         if (operatorStack.Count == 0 && valueStack.Count == 1)
-                    return valueStack.Pop();
+            return valueStack.Pop();
 
-                else if (operatorStack.Count == 1 && valueStack.Count == 2 &&
-                    (operatorStack.Peek().Equals("+") || operatorStack.Peek().Equals("-")))
-                {
-                    String poppedOperator = operatorStack.Pop();
-                    int value1 = valueStack.Pop();
-                    int value2 = valueStack.Pop();
+        else if (operatorStack.Count == 1 && valueStack.Count == 2 &&
+            (operatorStack.Peek().Equals("+") || operatorStack.Peek().Equals("-")))
+        {
+            String poppedOperator = operatorStack.Pop();
+            int value1 = valueStack.Pop();
+            int value2 = valueStack.Pop();
 
-                    if (poppedOperator.Equals("+"))
-                        return value1 + value2;
-                    else if (poppedOperator.Equals("-"))
-                        return value2 - value1;
-                }
+            if (poppedOperator.Equals("+"))
+                return value1 + value2;
+            else if (poppedOperator.Equals("-"))
+                return value2 - value1;
+        }
         return 0;
 
     }

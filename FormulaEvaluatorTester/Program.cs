@@ -21,6 +21,8 @@ Console.WriteLine(Evaluator.Evaluate("5*2+5", null));
 Console.WriteLine(Evaluator.Evaluate("4/2*5", null));
 
 Console.WriteLine(Evaluator.Evaluate("5", null));
+Console.WriteLine(Evaluator.Evaluate("0/2", null));
+
 
 try
 {
@@ -31,7 +33,15 @@ catch (Exception)
     Console.WriteLine("Found error");
 }
 
-Console.WriteLine(Evaluator.Evaluate("-5", null));
+try
+{
+    Console.WriteLine(Evaluator.Evaluate("-5", null));
+
+}
+catch(Exception)
+{
+    Console.WriteLine("Unary operator exception thrown ");
+}
 try
 {
     Console.WriteLine(Evaluator.Evaluate("()/0", null));
@@ -61,7 +71,7 @@ catch(Exception)
 
 try
 {
-    Console.WriteLine(Evaluator.Evaluate("(2*4)+6/0", null));
+    Console.WriteLine(Evaluator.Evaluate("(2*4)+/0", null));
 }
 
 catch(Exception)
