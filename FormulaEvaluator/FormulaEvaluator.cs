@@ -2,6 +2,11 @@
 
 namespace FormulaEvaluator;
 
+
+/// <summary>
+/// 
+/// </summary>
+
 public static class Evaluator
 {
     public delegate int Lookup(String variable_name);
