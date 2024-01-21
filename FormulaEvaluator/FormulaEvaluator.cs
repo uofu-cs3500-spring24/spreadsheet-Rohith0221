@@ -9,8 +9,8 @@ public static class Evaluator
     public static int Evaluate(String expression,
                            Lookup variableEvaluator)
     {
-        Stack<int> valueStack=null;
-        Stack<string> operatorStack=null;
+        Stack<int> valueStack = new();
+        Stack<string> operatorStack=new();
 
         expression = expression.Trim();
         string[] substrings =
@@ -24,7 +24,8 @@ public static class Evaluator
                 /// if operatorStack has either multiplication or division operator, performs right operation
                 /// and pushes result onto valueStack
 
-                if ((operatorStack.Count != 0) && ((operatorStack.Peek().Equals("/")) || (operatorStack.Peek().Equals("*"))))
+                if (operatorStack!=null &&(operatorStack.Count != 0) && ((operatorStack.Peek().Equals("/"))
+                     || (operatorStack.Peek().Equals("*"))))
                 {
                     if (valueStack.Count != 0)
                     {
@@ -42,27 +43,34 @@ public static class Evaluator
                 }
                 valueStack.Push(parsedValue);
             }
-            else if (!int.TryParse(substrings[i], out int castedValue))
+            else if (((!substrings[i].Equals("+"))
+                     || (!substrings[i].Equals("-"))
+                     || (!substrings[i].Equals("*"))
+                     || (!substrings[i].Equals("/")))
+                     && (!int.TryParse(substrings[i], out int castedValue)))
+                   
             {
                 try
                 {
-                    if ((operatorStack.Count != 0) && ((operatorStack.Peek().Equals("/")) || (operatorStack.Peek().Equals("*"))))
+                    if ((operatorStack!=null &&operatorStack.Count != 0)
+                        &&((operatorStack.Peek().Equals("/"))
+                        || (operatorStack.Peek().Equals("*"))))
                     {
                         if (valueStack.Count != 0)
                         {
                             int poppedInt = valueStack.Pop();
                             string poppedOperator = operatorStack.Pop();
                             if (poppedOperator.Equals("*"))
-                                valueStack.Push(poppedInt * parsedValue);
+                                valueStack.Push(poppedInt * variableEvaluator(substrings[i]));
                             else if (poppedOperator.Equals("/"))
                             {
-                                if (parsedValue == 0)
+                                if (variableEvaluator(substrings[i]) == 0)
                                     throw new Exception(" Cannot divide by zero! ");
-                                valueStack.Push(poppedInt / parsedValue);
+                                valueStack.Push(poppedInt / variableEvaluator(substrings[i]));
                             }
                         }
                     }
-                    valueStack.Push(parsedValue);
+                    valueStack.Push(variableEvaluator(substrings[i]));
                 }
                 catch (Exception e)
                 {
@@ -140,7 +148,7 @@ public static class Evaluator
                 
             }
 
-            if (operatorStack.Count == 0 && valueStack.Count == 1)
+            else if (operatorStack.Count == 0 && valueStack.Count == 1)
                 return valueStack.Pop();
 
             else if(operatorStack.Count==1 && valueStack.Count==2 &&
