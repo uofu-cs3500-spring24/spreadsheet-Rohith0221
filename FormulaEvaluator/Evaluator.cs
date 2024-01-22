@@ -58,11 +58,23 @@ public static class Evaluator
             substrings[i] = substrings[i].Trim();
 
             // If theres a unary operator,throws an exception as it's considered bad formula
-            if ((substrings[i].Equals("-") || (substrings[i].Equals("+"))) && (substrings[i + 1].Equals("(") ||
-                isVariable(substrings[i + 1]) || (int.TryParse(substrings[i + 1], out int convertedIntValue))))
+
+            // If after splitting into tokens, first token is an empty space then looks one spot additional to check for
+            // improper unary operator 
+            if (i==0 && ((substrings[i].Equals("")) && (substrings[i+1].Equals("-") || (substrings[i+1].Equals("+"))) && (substrings[i + 2].Equals("(") ||
+                isVariable(substrings[i + 2]) || (int.TryParse(substrings[i + 2], out int convertedIntValue))
+                && convertedIntValue >= 0)))
             {
                 throw new ArgumentException(" Bad formula with unary operator found ! ");
             }
+
+            else if (i==0 && (substrings[i].Equals("-") || (substrings[i].Equals("+"))) && (substrings[i + 1].Equals("(") ||
+                    isVariable(substrings[i + 1]) || int.TryParse(substrings[i + 1], out int convertedValue)
+                    && convertedValue>=0))
+            {
+                throw new ArgumentException(" Bad formula with unary operator found ! ");
+            }
+
             if (substrings[i].Equals("") || substrings[i].Equals("+")
                 || substrings[i].Equals("-") || substrings[i].Equals("/")
                 || substrings[i].Equals(")") || substrings[i].Equals("/")
@@ -134,9 +146,9 @@ public static class Evaluator
                                     }
                                 }
                             }
-                            else
-                                valueStack.Push(variableEvaluator(substrings[i]));
                         }
+                        else
+                            valueStack.Push(variableEvaluator(substrings[i]));
                     }
                     catch (Exception e)
                     {
