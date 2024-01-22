@@ -126,8 +126,6 @@ public static class Evaluator
                                 {
                                     try
                                     {
-                                        //if (variableEvaluator(substrings[i]) == 0)
-                                        //    throw new Exception(" Cannot divide by zero! ");
                                         valueStack.Push(poppedInt / variableEvaluator(substrings[i]));
                                     }
                                     catch (Exception)
