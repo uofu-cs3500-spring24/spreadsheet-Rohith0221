@@ -10,7 +10,14 @@ string var2 = "A7";
 Console.WriteLine(Evaluator.Evaluate("(2+35)*A7", var2 => 8));
 Console.WriteLine(Evaluator.Evaluate(" (2 +X1)*5+2", var => 7));
 
-
+try
+{ 
+Console.WriteLine(Evaluator.Evaluate("+5", null));
+}
+catch(Exception)
+{
+    Console.WriteLine(" Unary + found ");
+}
 
 Console.WriteLine(Evaluator.Evaluate("(2 +   X1)*   5 + 2", var => 7));
 
@@ -21,12 +28,14 @@ Console.WriteLine(Evaluator.Evaluate("5*2+5", null));
 Console.WriteLine(Evaluator.Evaluate("4/2*5", null));
 
 Console.WriteLine(Evaluator.Evaluate("5", null));
+
+
 Console.WriteLine(Evaluator.Evaluate("0/2", null));
 
 
 try
 {
-    Evaluator.Evaluate(" -A- ",null);
+    Evaluator.Evaluate(" -A- ", null);
 }
 catch (Exception)
 {
@@ -38,7 +47,7 @@ try
     Console.WriteLine(Evaluator.Evaluate("-5", null));
 
 }
-catch(Exception)
+catch (Exception)
 {
     Console.WriteLine("Unary operator exception thrown ");
 }
@@ -54,9 +63,9 @@ try
 {
     Console.WriteLine(Evaluator.Evaluate("(0*2)/0", null));
 }
-catch(Exception)
+catch (Exception)
 {
-        Console.WriteLine("Error 2");
+    Console.WriteLine("Error 2");
 
 }
 
@@ -64,7 +73,7 @@ try
 {
     Console.WriteLine(Evaluator.Evaluate("2*4/0", null));
 }
-catch(Exception)
+catch (Exception)
 {
     Console.WriteLine("error 3");
 }
@@ -74,7 +83,7 @@ try
     Console.WriteLine(Evaluator.Evaluate("(2*4)+/0", null));
 }
 
-catch(Exception)
+catch (Exception)
 {
     Console.WriteLine("error 4");
 }

@@ -4,31 +4,64 @@ namespace FormulaEvaluator;
 
 
 /// <summary>
+///
+///     Author : Rohith Veeramachaneni
+///     Date   : Jan 21, 2024
+///     Partner: None
+
+/// 
+/// Evaluator class consists few methods that evaluates a given math expression utilising some helper methods
+/// by taking in a string expression as well as takes in a delegate variable to lookup the value of the variable found while
+/// parsing tokens from given string.
 /// 
 /// </summary>
 
 public static class Evaluator
 {
+    /// <summary>
+    /// 
+    ///  This delegate is used to find the value of the variable found while parsing token from
+    ///  a string expression
+    ///  
+    /// </summary>
+    /// 
+    /// <param name="variable_name"></param> Name of the variable found as a token
+    /// <returns></returns> v=Integer value associated with that variable
     public delegate int Lookup(String variable_name);
 
 
+    /// <summary>
+    ///
+    ///  Evaluate method calculates final value from a math expression given as a String
+    ///  
+    /// </summary>
+    /// 
+    /// <param name="expression"></param> Math expression given as type string
+    /// <param name="variableEvaluator"></param> Delegate variable to find value of a variable token
+    /// <returns></returns> final result in integer type
+    /// <exception cref="ArgumentException"></exception> When errors occur while parsing or calculating value of given
+    ///                                                  expression
+    ///                                                  
     public static int Evaluate(String expression,
                            Lookup variableEvaluator)
     {
         Stack<int> valueStack = new();
         Stack<string> operatorStack = new();
+        // trims down leading and trailing whitespaces in given expression
         expression = expression.Trim();
         string[] substrings =
             Regex.Split(expression, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
 
         for (int i = 0; i < substrings.Length; i++)
         {
+            // trims down whitespaced again in the parsed token
             substrings[i] = substrings[i].Trim();
 
-            if (substrings[i].Equals("-") && (substrings[i+1].Equals("(") ||
+            // If theres a unary operator,throws an exception as it's considered bad formula
+            if ((substrings[i].Equals("-") || (substrings[i].Equals("+")))&& (substrings[i+1].Equals("(") ||
                 isVariable(substrings[i+1]) || (int.TryParse(substrings[i+1],out int convertedIntValue))))
             {
-                throw new Exception(" Bad formula with unary operator found ! ");
+                throw new ArgumentException(" Bad formula with unary operator found ! ");
             }
             if (substrings[i].Equals("") || substrings[i].Equals("+")
                 || substrings[i].Equals("-") || substrings[i].Equals("/")
@@ -59,7 +92,7 @@ public static class Evaluator
                             else if (poppedOperator.Equals("/"))
                             {
                                 if (parsedValue == 0)
-                                    throw new Exception(" Cannot divide by zero! ");
+                                    throw new ArgumentException(" Cannot divide by zero! ");
                                 valueStack.Push(poppedInt / parsedValue);
                             }
                         }
@@ -67,10 +100,12 @@ public static class Evaluator
                     else
                         valueStack.Push(parsedValue);
                 }
+                // If token is a variable , delegate is used to find value of that
                 else if (isVariable(substrings[i]))
                 {
                     try
                     {
+                        // If operatorStack has '/' or '*'
                         if ((operatorStack != null && operatorStack.Count != 0)
                            && ((operatorStack.Peek().Equals("/"))
                            || (operatorStack.Peek().Equals("*"))))
@@ -83,21 +118,30 @@ public static class Evaluator
                                     valueStack.Push(poppedInt * variableEvaluator(substrings[i]));
                                 else if (poppedOperator.Equals("/"))
                                 {
-                                    if (variableEvaluator(substrings[i]) == 0)
-                                        throw new Exception(" Cannot divide by zero! ");
-                                    valueStack.Push(poppedInt / variableEvaluator(substrings[i]));
+                                    try
+                                    {
+                                        //if (variableEvaluator(substrings[i]) == 0)
+                                        //    throw new Exception(" Cannot divide by zero! ");
+                                        valueStack.Push(poppedInt / variableEvaluator(substrings[i]));
+                                    }
+                                    catch (Exception)
+                                    {
+                                        throw new ArgumentException(" Cannot divide by zero! ");
+                                    }
                                 }
                             }
+                            else
+                                valueStack.Push(variableEvaluator(substrings[i]));
                         }
-                        else
-                            valueStack.Push(variableEvaluator(substrings[i]));
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine("No value found for given variable !");
+                        throw new ArgumentException("No value found for given variable !");
                     }
 
                 }
+
+                // checks if parsed token is either '+' or '-' operator and if so pushes operator onto the operator stack
                 else if (substrings[i].Equals("+") || substrings[i].Equals("-"))
                 {
                     if (valueStack.Count >= 2)
@@ -117,6 +161,7 @@ public static class Evaluator
                     operatorStack.Push(substrings[i]);
                 }
 
+                // checks if parsed token is either '*' or '/' operator and if so pushes operator onto the operator stack
                 else if (substrings[i].Equals("*") || substrings[i].Equals("/"))
                     operatorStack.Push(substrings[i]);
 
@@ -142,7 +187,7 @@ public static class Evaluator
                         else if (poppedOperator.Equals("-"))
                             valueStack.Push(value2 - value1);
 
-                        // Step 2 if "(" is at top of stack, pops it
+                        // Step 2 if "(" is at top of operator stack, pops it
                         if (operatorStack.Peek().Equals("("))
                             operatorStack.Pop();
 
@@ -164,7 +209,7 @@ public static class Evaluator
                                     valueStack.Push(value1 * value2);
                                 else if (poppedOperator.Equals("/"))
                                     if (value1 == 0)
-                                        throw new Exception(" Cannot divide by zero ");
+                                        throw new ArgumentException(" Cannot divide by zero ");
                                 valueStack.Push(value2 / value1);
                             }
                         }
@@ -174,8 +219,12 @@ public static class Evaluator
             }
             else
                 throw new ArgumentException(" Invalid operator " + substrings[i] + " found !");
-
         }
+
+        /*
+         * These operations happen when the last token has been parsed by looking at both of the stacks and performs 
+         * needed operation according to the algorithm provided
+         */
 
         if (operatorStack.Count == 0 && valueStack.Count == 1)
             return valueStack.Pop();
@@ -192,15 +241,19 @@ public static class Evaluator
             else if (poppedOperator.Equals("-"))
                 return value2 - value1;
         }
-        return 0;
+        return 0; // placeholder return value
 
     }
 
 
-
+    /// <summary>
+    ///  isVariable method is a helper method that checks if a token passed as an argument is a variable
+    ///  
+    /// <param name="token"></param> Certain token parsed from a string expression
+    /// 
+    /// <returns></returns> true if given token is a variable otherwise false
     private static Boolean isVariable(String token)
     {
-        // Used chat-GPT to get this Regex
         return Regex.IsMatch(token, "^[a-zA-Z][a-zA-Z0-9]*$");
     }
 
