@@ -3,6 +3,13 @@ using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using FormulaEvaluator;
 
+///     Author : Rohith Veeramachaneni
+///     Date   : Jan 21, 2024
+///     Partner: None
+///
+/// This console app is a tester file with all the tests that test out the functionality of FormulaEvaluator also considering
+/// edge cases
+
 Console.WriteLine("Hello, World!");
 
 string var = "X1";
@@ -11,10 +18,10 @@ Console.WriteLine(Evaluator.Evaluate("(2+35)*A7", var2 => 8));
 Console.WriteLine(Evaluator.Evaluate(" (2 +X1)*5+2", var => 7));
 
 try
-{ 
-Console.WriteLine(Evaluator.Evaluate("+5", null));
+{
+    Console.WriteLine(Evaluator.Evaluate("+5", null));
 }
-catch(Exception)
+catch (Exception)
 {
     Console.WriteLine(" Unary + found ");
 }

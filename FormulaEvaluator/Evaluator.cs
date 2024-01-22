@@ -58,8 +58,8 @@ public static class Evaluator
             substrings[i] = substrings[i].Trim();
 
             // If theres a unary operator,throws an exception as it's considered bad formula
-            if ((substrings[i].Equals("-") || (substrings[i].Equals("+")))&& (substrings[i+1].Equals("(") ||
-                isVariable(substrings[i+1]) || (int.TryParse(substrings[i+1],out int convertedIntValue))))
+            if ((substrings[i].Equals("-") || (substrings[i].Equals("+"))) && (substrings[i + 1].Equals("(") ||
+                isVariable(substrings[i + 1]) || (int.TryParse(substrings[i + 1], out int convertedIntValue))))
             {
                 throw new ArgumentException(" Bad formula with unary operator found ! ");
             }
@@ -91,9 +91,15 @@ public static class Evaluator
                                 valueStack.Push(poppedInt * parsedValue);
                             else if (poppedOperator.Equals("/"))
                             {
-                                if (parsedValue == 0)
+                                try
+                                {
+                                    valueStack.Push(poppedInt / parsedValue);
+                                }
+                                catch (Exception)
+                                {
                                     throw new ArgumentException(" Cannot divide by zero! ");
-                                valueStack.Push(poppedInt / parsedValue);
+                                }
+
                             }
                         }
                     }
