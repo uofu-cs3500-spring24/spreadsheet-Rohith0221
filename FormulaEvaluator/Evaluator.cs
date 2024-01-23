@@ -61,16 +61,17 @@ public static class Evaluator
 
             // If after splitting into tokens, first token is an empty space then looks one spot additional to check for
             // improper unary operator 
-            if (i==0 && ((substrings[i].Equals("")) && (substrings[i+1].Equals("-") || (substrings[i+1].Equals("+"))) && (substrings[i + 2].Equals("(") ||
-                isVariable(substrings[i + 2]) || (int.TryParse(substrings[i + 2], out int convertedIntValue))
+            if (i == 0 && ((substrings[i].Equals("")) && (substrings[i + 1].Equals("-")
+                || (substrings[i + 1].Equals("+"))) && (substrings[i + 2].Equals("(")
+                || isVariable(substrings[i + 2]) || (int.TryParse(substrings[i + 2], out int convertedIntValue))
                 && convertedIntValue >= 0)))
             {
                 throw new ArgumentException(" Bad formula with unary operator found ! ");
             }
 
-            else if (i==0 && (substrings[i].Equals("-") || (substrings[i].Equals("+"))) && (substrings[i + 1].Equals("(") ||
+            else if (i == 0 && (substrings[i].Equals("-") || (substrings[i].Equals("+"))) && (substrings[i + 1].Equals("(") ||
                     isVariable(substrings[i + 1]) || int.TryParse(substrings[i + 1], out int convertedValue)
-                    && convertedValue>=0))
+                    && convertedValue >= 0))
             {
                 throw new ArgumentException(" Bad formula with unary operator found ! ");
             }
@@ -95,7 +96,7 @@ public static class Evaluator
                     if (operatorStack != null && (operatorStack.Count != 0) && ((operatorStack.Peek().Equals("/"))
                          || (operatorStack.Peek().Equals("*"))))
                     {
-                        if (valueStack.Count != 0)
+                        if (valueStack!=null && valueStack.Count != 0)
                         {
                             int poppedInt = valueStack.Pop();
                             string poppedOperator = operatorStack.Pop();
@@ -128,7 +129,7 @@ public static class Evaluator
                            && ((operatorStack.Peek().Equals("/"))
                            || (operatorStack.Peek().Equals("*"))))
                         {
-                            if (valueStack.Count != 0)
+                            if (valueStack != null &&  valueStack.Count != 0)
                             {
                                 int poppedInt = valueStack.Pop();
                                 string poppedOperator = operatorStack.Pop();
@@ -160,18 +161,21 @@ public static class Evaluator
                 // checks if parsed token is either '+' or '-' operator and if so pushes operator onto the operator stack
                 else if (substrings[i].Equals("+") || substrings[i].Equals("-"))
                 {
-                    if (valueStack.Count >= 2)
+                    if (operatorStack != null && valueStack != null)
+
                     {
-                        int value1 = valueStack.Pop();
-                        int value2 = valueStack.Pop();
-                        if (operatorStack.Count != 0 && operatorStack.Peek().Equals("+")
-                            || operatorStack.Peek().Equals("-"))
+                        if (valueStack.Count >= 2 && operatorStack.Count !=0)
                         {
-                            string poppedOperator = operatorStack.Pop();
-                            if (poppedOperator.Equals("+"))
-                                valueStack.Push(value1 + value2);
-                            else if (poppedOperator.Equals("-"))
-                                valueStack.Push(value2 - value1);
+                            if (operatorStack.Peek().Equals("+") || operatorStack.Peek().Equals("-"))
+                            {
+                                int value1 = valueStack.Pop();
+                                int value2 = valueStack.Pop();
+                                string poppedOperator = operatorStack.Pop();
+                                if (poppedOperator.Equals("+"))
+                                    valueStack.Push(value1 + value2);
+                                else if (poppedOperator.Equals("-"))
+                                    valueStack.Push(value2 - value1);
+                            }
                         }
                     }
                     operatorStack.Push(substrings[i]);
@@ -226,7 +230,8 @@ public static class Evaluator
                                 else if (poppedOperator.Equals("/"))
                                     if (value1 == 0)
                                         throw new ArgumentException(" Cannot divide by zero ");
-                                valueStack.Push(value2 / value1);
+                                    else
+                                        valueStack.Push(value2 / value1);
                             }
                         }
                     }

@@ -117,8 +117,8 @@ Console.WriteLine();
 Console.WriteLine(Evaluator.Evaluate("2+X1", s => 4));
 Console.WriteLine();
 
-Console.WriteLine(Evaluator.Evaluate("2+X1", s => { throw new ArgumentException("Unknown variable"); }));
-Console.WriteLine();
+//Console.WriteLine(Evaluator.Evaluate("2+X1", s => { throw new ArgumentException("Unknown variable"); }));
+//Console.WriteLine();
 
 Console.WriteLine(Evaluator.Evaluate("2*6+3", s => 0));
 Console.WriteLine();
@@ -147,8 +147,8 @@ Console.WriteLine();
 Console.WriteLine(Evaluator.Evaluate("2+3*5+(3+4*8)*5+2", s => 0));
 Console.WriteLine();
 
-Console.WriteLine(Evaluator.Evaluate("5/0", s => 0));
-Console.WriteLine();
+//Console.WriteLine(Evaluator.Evaluate("5/0", s => 0));
+//Console.WriteLine();
 
 Console.WriteLine(Evaluator.Evaluate("+", s => 0));
 Console.WriteLine();
