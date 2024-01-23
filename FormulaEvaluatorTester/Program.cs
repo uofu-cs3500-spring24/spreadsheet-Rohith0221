@@ -11,92 +11,90 @@ using FormulaEvaluator;
 /// edge cases
 
 
-//string var = "X1";
-//string var2 = "A7";
 
-//Console.WriteLine(Evaluator.Evaluate("(2+35)*A7", var2 => 8));
-//Console.WriteLine("Assumed Error 2 " + Evaluator.Evaluate(" (2 +X1)*5+2", var => 7));
+Console.WriteLine(Evaluator.Evaluate("(2+35)*A7", var2 => 8));
+Console.WriteLine(Evaluator.Evaluate(" (2 +X1)*5+2", var => 7));
 
-//try
-//{
-//    Console.WriteLine(Evaluator.Evaluate("+5", null));
-//}
-//catch (Exception)
-//{
-//    Console.WriteLine(" Unary + found ");
-//}
+try
+{
+    Console.WriteLine(Evaluator.Evaluate("+5", null));
+}
+catch (ArgumentException)
+{
+    Console.WriteLine(" Unary + found ");
+}
 
-//Console.WriteLine(Evaluator.Evaluate("(2 +   X1)*   5 + 2", var => 7));
+Console.WriteLine(Evaluator.Evaluate("(2 +   X1)*   5 + 2", var => 7));
 
-//Console.WriteLine(Evaluator.Evaluate("5+5", null));
+Console.WriteLine(Evaluator.Evaluate("5+5", null));
 
-//Console.WriteLine(Evaluator.Evaluate("5*2+5", null));
+Console.WriteLine(Evaluator.Evaluate("5*2+5", null));
 
-//Console.WriteLine(Evaluator.Evaluate("4/2*5", null));
+Console.WriteLine(Evaluator.Evaluate("4/2*5", null));
 
-//Console.WriteLine(Evaluator.Evaluate("5", null));
+Console.WriteLine(Evaluator.Evaluate("5", null));
 
 
-//Console.WriteLine(Evaluator.Evaluate("0/2", null));
+Console.WriteLine(Evaluator.Evaluate("0/2", null));
 
 
-//try
-//{
-//    Evaluator.Evaluate(" -A- ", null);
-//}
-//catch (Exception)
-//{
-//    Console.WriteLine("Found error");
-//}
+try
+{
+    Evaluator.Evaluate(" -A- ", null);
+}
+catch (ArgumentException)
+{
+    Console.WriteLine("Found error");
+}
 
-//try
-//{
-//    Console.WriteLine(Evaluator.Evaluate("-5", null));
+try
+{
+    Console.WriteLine(Evaluator.Evaluate("-5", null));
 
-//}
-//catch (Exception)
-//{
-//    Console.WriteLine("Unary operator exception thrown ");
-//}
-//try
-//{
-//    Console.WriteLine(Evaluator.Evaluate("()/0", null));
-//}
-//catch (Exception)
-//{
-//    Console.WriteLine("Error 1");
-//}
-//try
-//{
-//    Console.WriteLine(Evaluator.Evaluate("(0*2)/0", null));
-//}
-//catch (Exception)
-//{
-//    Console.WriteLine("Error 2");
+}
+catch (ArgumentException)
+{
+    Console.WriteLine("Unary operator exception thrown ");
+}
+try
+{
+    Console.WriteLine(Evaluator.Evaluate("()/0", null));
+}
+catch (ArgumentException)
+{
+    Console.WriteLine("Error 1");
+}
+try
+{
+    Console.WriteLine(Evaluator.Evaluate("(0*2)/0", null));
+}
+catch (ArgumentException)
+{
+    Console.WriteLine("Error 2");
 
-//}
+}
 
-//try
-//{
-//    Console.WriteLine(Evaluator.Evaluate("2*4/0", null));
-//}
-//catch (Exception)
-//{
-//    Console.WriteLine("error 3");
-//}
+try
+{
+    Console.WriteLine(Evaluator.Evaluate("2*4/0", null));
+}
+catch (ArgumentException)
+{
+    Console.WriteLine("error 3");
+}
 
-//try
-//{
-//    Console.WriteLine(Evaluator.Evaluate("(2*4)+/0", null));
-//}
+try
+{
+    Console.WriteLine(Evaluator.Evaluate("(2*4)+/0", null));
+}
 
-//catch (Exception)
-//{
-//    Console.WriteLine("error 4");
-//}
+catch (ArgumentException)
+{
+    Console.WriteLine("error 4");
+}
 
 
-    Console.WriteLine(Evaluator.Evaluate("5", s => 0));
+Console.WriteLine(Evaluator.Evaluate("5", s => 0));
     Console.WriteLine();
 
     Console.WriteLine(Evaluator.Evaluate("X5", s => 13));
@@ -117,8 +115,15 @@ Console.WriteLine();
 Console.WriteLine(Evaluator.Evaluate("2+X1", s => 4));
 Console.WriteLine();
 
-//Console.WriteLine(Evaluator.Evaluate("2+X1", s => { throw new ArgumentException("Unknown variable"); }));
-//Console.WriteLine();
+//try
+//{
+//    Console.WriteLine(Evaluator.Evaluate("2+X1", s => { throw new ArgumentException("Unknown variable"); }));
+//}
+//catch(ArgumentException)
+//{
+//    throw new ArgumentException("Error ");
+//}
+Console.WriteLine();
 
 Console.WriteLine(Evaluator.Evaluate("2*6+3", s => 0));
 Console.WriteLine();
@@ -147,8 +152,15 @@ Console.WriteLine();
 Console.WriteLine(Evaluator.Evaluate("2+3*5+(3+4*8)*5+2", s => 0));
 Console.WriteLine();
 
-//Console.WriteLine(Evaluator.Evaluate("5/0", s => 0));
-//Console.WriteLine();
+try
+{
+    Console.WriteLine(Evaluator.Evaluate("5/0", s => 0));
+}
+catch(ArgumentException)
+{
+    Console.WriteLine("Error");
+}
+Console.WriteLine();
 
 try
 {
