@@ -150,26 +150,56 @@ Console.WriteLine();
 //Console.WriteLine(Evaluator.Evaluate("5/0", s => 0));
 //Console.WriteLine();
 
-Console.WriteLine(Evaluator.Evaluate("+", s => 0));
+try
+{
+    Console.WriteLine(Evaluator.Evaluate("+", s => 0));
+}
+catch(ArgumentException)
+{
+    Console.WriteLine(" Error 1");
+}
 Console.WriteLine();
 
-Console.WriteLine(Evaluator.Evaluate("2+5+", s => 0));
+try
+{
+    Console.WriteLine(Evaluator.Evaluate("2+5+", s => 0));
+}
+catch (ArgumentException)
+{
+    Console.WriteLine(" Error 2");
+}
 Console.WriteLine();
 
-Console.WriteLine(Evaluator.Evaluate("2+5*7)", s => 0));
+try
+{
+    Console.WriteLine(Evaluator.Evaluate("2+5*7)", s => 0));
+}
+catch(ArgumentException)
+{
+    Console.WriteLine("Error 3");
+}
 Console.WriteLine();
 
 Console.WriteLine(Evaluator.Evaluate("xx", s => 0));
+
 Console.WriteLine();
 
 Console.WriteLine(Evaluator.Evaluate("5+xx", s => 0));
+
 Console.WriteLine();
 
-Console.WriteLine(Evaluator.Evaluate("5+7+(5)8", s => 0));
-Console.WriteLine();
+//Console.WriteLine(Evaluator.Evaluate("5+7+(5)8", s => 0));
+//Console.WriteLine();
 
+try
+{
+    Console.WriteLine(Evaluator.Evaluate("", s => 0));
+}
+catch (ArgumentException)
+{
+    Console.WriteLine(" Error 6");
+}
 
-Console.WriteLine(Evaluator.Evaluate("", s => 0));
 Console.WriteLine();
 
 
