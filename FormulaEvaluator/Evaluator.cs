@@ -45,6 +45,8 @@ public static class Evaluator
     public static int Evaluate(String expression,
                            Lookup variableEvaluator)
     {
+        if (expression == null)
+            throw new ArgumentException(" No string expression found ! ");
         Stack<int> valueStack = new();
         Stack<string> operatorStack = new();
         // trims down leading and trailing whitespaces in given expression
@@ -61,7 +63,7 @@ public static class Evaluator
 
             // If after splitting into tokens, first token is an empty space then looks one spot additional to check for
             // improper unary operator 
-            if (i == 0 && (!((i + 1) >=substrings.Length)) && ((substrings[i].Equals("")) && (substrings[i + 1].Equals("-")
+            if (i == 0 && (!((i + 1) >= substrings.Length)) && ((substrings[i].Equals("")) && (substrings[i + 1].Equals("-")
                 || (substrings[i + 1].Equals("+"))) && (substrings[i + 2].Equals("(")
                 || isVariable(substrings[i + 2]) || (int.TryParse(substrings[i + 2], out int convertedIntValue))
                 && convertedIntValue >= 0)))
@@ -77,16 +79,17 @@ public static class Evaluator
                 throw new ArgumentException(" Bad formula with unary operator found ! ");
             }
 
-            if (substrings[i].Equals("") || substrings[i].Equals("+")
-                || substrings[i].Equals("-") || substrings[i].Equals("/")
+            if (substrings[i].Equals(""))
+                continue;
+
+
+            if ( substrings[i].Equals("+") || substrings[i].Equals("-") || substrings[i].Equals("/")
                 || substrings[i].Equals(")") || substrings[i].Equals("/")
                 || substrings[i].Equals("(") || substrings[i].Equals("*")
                 || isVariable(substrings[i])
                 || (int.TryParse(substrings[i], out int checkConvertedInt) && checkConvertedInt >= 0))
             {
 
-                if (substrings[i].Equals(""))
-                    continue;
 
                 /// If token is an integer
                 if (int.TryParse(substrings[i], out int parsedValue))
@@ -162,24 +165,35 @@ public static class Evaluator
                 // checks if parsed token is either '+' or '-' operator and if so pushes operator onto the operator stack
                 else if (substrings[i].Equals("+") || substrings[i].Equals("-"))
                 {
-                    if (operatorStack != null && valueStack != null)
+                    if (operatorStack != null && operatorStack.Count != 0)
 
                     {
-                        if (valueStack.Count >= 2 && operatorStack.Count != 0)
+                        if (operatorStack.Peek().Equals("+") || operatorStack.Peek().Equals("-"))
                         {
-                            if (operatorStack.Peek().Equals("+") || operatorStack.Peek().Equals("-"))
+                            if (valueStack.Count >= 2)
                             {
                                 int value1 = valueStack.Pop();
                                 int value2 = valueStack.Pop();
                                 string poppedOperator = operatorStack.Pop();
                                 if (poppedOperator.Equals("+"))
+                                {
                                     valueStack.Push(value1 + value2);
+                                    operatorStack.Push(substrings[i]);
+                                }
                                 else if (poppedOperator.Equals("-"))
+                                {
                                     valueStack.Push(value2 - value1);
+                                    operatorStack.Push(substrings[i]);
+                                }
                             }
+                            else
+                                operatorStack.Push(substrings[i]);
                         }
+                        else
+                            operatorStack.Push(substrings[i]);
                     }
-                    operatorStack.Push(substrings[i]);
+                    else
+                        operatorStack.Push(substrings[i]);
                 }
 
                 // checks if parsed token is either '*' or '/' operator and if so pushes operator onto the operator stack
@@ -210,7 +224,7 @@ public static class Evaluator
                     }
 
                     // Step 2 if "(" is at top of operator stack, pops it
-                    if (operatorStack != null && operatorStack.Count!=0
+                    if (operatorStack != null && operatorStack.Count != 0
                         && operatorStack.Peek().Equals("("))
                         operatorStack.Pop();
                     else
@@ -243,44 +257,43 @@ public static class Evaluator
             }
             else
                 throw new ArgumentException(" Invalid operator " + substrings[i] + " found !");
-            
         }
 
-            /*
-             * These operations happen when the last token has been parsed by looking at both of the stacks and performs 
-             * needed operation according to the algorithm provided
-             */
+        /*
+         * These operations happen when the last token has been parsed by looking at both of the stacks and performs 
+         * needed operation according to the algorithm provided
+         */
 
-            if (operatorStack.Count == 0 && valueStack.Count == 1)
-                return valueStack.Pop();
+        if (operatorStack.Count == 0 && valueStack.Count == 1)
+            return valueStack.Pop();
 
-            else if (operatorStack.Count == 1 && valueStack.Count == 2 &&
-                (operatorStack.Peek().Equals("+") || operatorStack.Peek().Equals("-")))
-            {
-                String poppedOperator = operatorStack.Pop();
-                int value1 = valueStack.Pop();
-                int value2 = valueStack.Pop();
-
-                if (poppedOperator.Equals("+"))
-                    return value1 + value2;
-                else if (poppedOperator.Equals("-"))
-                    return value2 - value1;
-            }
-            throw new ArgumentException(" Errors found ");
-        }
-
-
-        /// <summary>
-        ///  isVariable method is a helper method that checks if a token passed as an argument is a variable
-        ///  
-        /// <param name="token"></param> Certain token parsed from a string expression
-        /// 
-        /// <returns></returns> true if given token is a variable otherwise false
-        static Boolean isVariable(String token)
+        else if (operatorStack.Count == 1 && valueStack.Count == 2 &&
+            (operatorStack.Peek().Equals("+") || operatorStack.Peek().Equals("-")))
         {
-            return Regex.IsMatch(token, "^[a-zA-Z][a-zA-Z0-9]*$");
-        }
+            String poppedOperator = operatorStack.Pop();
+            int value1 = valueStack.Pop();
+            int value2 = valueStack.Pop();
 
-    
+            if (poppedOperator.Equals("+"))
+                return value1 + value2;
+            else if (poppedOperator.Equals("-"))
+                return value2 - value1;
+        }
+        throw new ArgumentException(" Errors found ");
+    }
+
+
+    /// <summary>
+    ///  isVariable method is a helper method that checks if a token passed as an argument is a variable
+    ///  
+    /// <param name="token"></param> Certain token parsed from a string expression
+    /// 
+    /// <returns></returns> true if given token is a variable otherwise false
+    static Boolean isVariable(String token)
+    {
+        return Regex.IsMatch(token, "^[a-zA-Z][a-zA-Z0-9]*[0-9]$");
+    }
+
+
 }
 
