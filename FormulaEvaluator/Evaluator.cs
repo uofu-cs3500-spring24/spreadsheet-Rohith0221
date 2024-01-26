@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 namespace FormulaEvaluator;
 
@@ -280,6 +281,8 @@ public static class Evaluator
                 return value2 - value1;
         }
         throw new ArgumentException(" Errors found ");
+
+        
     }
 
 
@@ -294,6 +297,7 @@ public static class Evaluator
         return Regex.IsMatch(token, "^[a-zA-Z][a-zA-Z0-9]*[0-9]$");
     }
 
+   
 
 }
 
