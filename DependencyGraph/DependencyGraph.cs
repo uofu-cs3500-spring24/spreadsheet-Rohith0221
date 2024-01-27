@@ -101,7 +101,7 @@ namespace SpreadsheetUtilities
         public bool HasDependees(string s)
         {
 
-            return GetDependees(s).Count() != 0;
+            return this[s]!=0;
         }
 
 
@@ -163,13 +163,27 @@ namespace SpreadsheetUtilities
         {
             if (nodesGraph.ContainsKey(s))
             {
-                if (nodesGraph[s].Count()!=0)
-
-                nodesGraph.Add(s, new HashSet<string>());
-                foreach (string toBeReplacedValue in newDependents)
+                if (nodesGraph[s].Count() != 0)
                 {
-                    this.AddDependency(s, toBeReplacedValue);
+                    nodesGraph[s] = new HashSet<string>();
                 }
+                if (newDependents.Count() != 0)
+                {
+                    foreach (string toBeReplacedValue in newDependents)
+                    {
+                        this.AddDependency(s, toBeReplacedValue);
+                    }
+                }
+            }
+            else
+            {
+                if (newDependents.Count() != 0)
+                {
+                    foreach (string newDependent in newDependents)
+                        AddDependency(s, newDependent);
+                }
+                else
+                    nodesGraph.Add(s,new HashSet<string>());
             }
         }
 
@@ -180,6 +194,23 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
+            foreach(string dependee in getDependeeList(s))
+            {
+                nodesGraph[dependee].Remove(s); 
+            }
+
+            IEnumerator newDependeeEnumerator = newDependees.GetEnumerator();
+
+            foreach(string newDependee in newDependees)
+            {
+                if (nodesGraph.ContainsKey(newDependee))
+                    nodesGraph[newDependee].Add(s);
+                else
+                {
+                    nodesGraph.Add(newDependee,new HashSet<string>());
+                    nodesGraph[newDependee].Add(s);
+                }
+            }
         }
 
         private IEnumerable<string> getDependeeList(string s)
