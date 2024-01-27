@@ -62,8 +62,11 @@ namespace SpreadsheetUtilities
             get
             {
                 int totalOrderedPairsCount = 0;
+                // gets all the keys in the dictionary
                 foreach (string key in nodesGraph.Keys)
                 {
+                    // gets all the dependents for the string key and adds their count to
+                    // get total number of pairs that exist in the dictionary
                     totalOrderedPairsCount += nodesGraph[key].Count();
                 }
                 return totalOrderedPairsCount;
@@ -89,8 +92,13 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependents(string s)
         {
-            if (nodesGraph[s].Count != 0)
-                return true;
+            // checks if the given string s exists as a key in the dictionary
+            if (nodesGraph.ContainsKey(s))
+            {
+                if (nodesGraph[s].Count != 0)
+                    return true;
+                return false;
+            }
             return false;
         }
 
@@ -100,8 +108,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependees(string s)
         {
-
-            return this[s]!=0;
+            return this[s]!=0; // checks if size of dependees is not zero
         }
 
 
@@ -110,7 +117,9 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return nodesGraph[s];
+            if(nodesGraph.ContainsKey(s))
+                return nodesGraph[s];
+            return null;
         }
 
         /// <summary>
@@ -137,7 +146,9 @@ namespace SpreadsheetUtilities
                 nodesGraph[s].Add(t);
             }
             else
+            {
                 nodesGraph[s].Add(t);
+            }
         }
 
 
@@ -163,10 +174,13 @@ namespace SpreadsheetUtilities
         {
             if (nodesGraph.ContainsKey(s))
             {
+                // resests the dependents of key string s if any exists
                 if (nodesGraph[s].Count() != 0)
                 {
                     nodesGraph[s] = new HashSet<string>();
                 }
+                // checks if needed to iterate through given IEnumerable and adds them to the
+                // string key s into the dictionary
                 if (newDependents.Count() != 0)
                 {
                     foreach (string toBeReplacedValue in newDependents)
@@ -177,6 +191,8 @@ namespace SpreadsheetUtilities
             }
             else
             {
+                // checks if needed to iterate through given IEnumerable and adds them to the
+                // string key s into the dictionary
                 if (newDependents.Count() != 0)
                 {
                     foreach (string newDependent in newDependents)
@@ -194,25 +210,33 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
+            // removes all the dependee connection for the given dependee string s
             foreach(string dependee in getDependeeList(s))
             {
                 nodesGraph[dependee].Remove(s); 
             }
 
-            IEnumerator newDependeeEnumerator = newDependees.GetEnumerator();
-
             foreach(string newDependee in newDependees)
             {
+                // if a key string s already exists, it adds dependee to that key
                 if (nodesGraph.ContainsKey(newDependee))
                     nodesGraph[newDependee].Add(s);
                 else
                 {
+                    // creates a new key entry in the dictionary if doesn't exist and adds
+                    // dependee to this key string s
                     nodesGraph.Add(newDependee,new HashSet<string>());
                     nodesGraph[newDependee].Add(s);
                 }
             }
         }
 
+        /// <summary>
+        ///  Helper method to retrieve all the dependents for the given dependee string s and stores them in
+        ///  a list
+        /// </summary>
+        /// <param name="s"></param> Dependee for which all dependents will have to be found
+        /// <returns></returns> List of all the dependents of the given dependee
         private IEnumerable<string> getDependeeList(string s)
         {
             List<string> dependeeList = new List<string>();
