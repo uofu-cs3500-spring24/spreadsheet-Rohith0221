@@ -42,7 +42,7 @@ namespace SpreadsheetUtilities
     /// </summary>
     public class DependencyGraph
     {
-        private Dictionary<string, HashSet<string>> nodes;
+        private Dictionary<string, HashSet<string>> nodesGraph;
 
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public DependencyGraph()
         {
-            nodes = new();
+            nodesGraph = new();
         }
 
 
@@ -59,13 +59,15 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int Size
         {
-            get {
-                List<string> keyList = nodes.Keys;
-                foreach(string key in nodes.Keys)
+            get
+            {
+                int totalOrderedPairsCount = 0;
+                foreach (string key in nodesGraph.Keys)
                 {
-                    
+                    totalOrderedPairsCount += nodesGraph[key].Count();
                 }
-                return nodes.Count; }
+                return totalOrderedPairsCount;
+            }
         }
 
 
@@ -78,7 +80,6 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int this[string s]
         {
-
             get { return this.GetDependees(s).Count(); }
         }
 
@@ -88,7 +89,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependents(string s)
         {
-            if (nodes[s].Count != 0)
+            if (nodesGraph[s].Count != 0)
                 return true;
             return false;
         }
@@ -100,7 +101,7 @@ namespace SpreadsheetUtilities
         public bool HasDependees(string s)
         {
 
-            return false;
+            return GetDependees(s).Count() != 0;
         }
 
 
@@ -109,16 +110,13 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return nodes[s];
+            return nodesGraph[s];
         }
 
         /// <summary>
         /// Enumerates dependees(s).
         /// </summary>
-        public IEnumerable<string> GetDependees(string s)
-        {
-            return null;
-        }
+        public IEnumerable<string> GetDependees(string s) =>getDependeeList(s);
 
 
         /// <summary>
@@ -133,8 +131,13 @@ namespace SpreadsheetUtilities
         /// <param name="t"> t cannot be evaluated until s is</param>        /// 
         public void AddDependency(string s, string t)
         {
-            nodes.Add(s, new HashSet<string>());
-            nodes[s].Add(t);
+            if (!nodesGraph.ContainsKey(s))
+            {
+                nodesGraph.Add(s, new HashSet<string>());
+                nodesGraph[s].Add(t);
+            }
+            else
+                nodesGraph[s].Add(t);
         }
 
 
@@ -145,9 +148,9 @@ namespace SpreadsheetUtilities
         /// <param name="t"></param>
         public void RemoveDependency(string s, string t)
         {
-            if (nodes[s].Contains(t))
+            if (nodesGraph.ContainsKey(s) && nodesGraph[s].Contains(t))
             {
-                nodes[s].Remove(t);
+                nodesGraph[s].Remove(t);
             }
         }
 
@@ -158,7 +161,16 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+            if (nodesGraph.ContainsKey(s))
+            {
+                if (nodesGraph[s].Count()!=0)
 
+                nodesGraph.Add(s, new HashSet<string>());
+                foreach (string toBeReplacedValue in newDependents)
+                {
+                    this.AddDependency(s, toBeReplacedValue);
+                }
+            }
         }
 
 
@@ -170,5 +182,18 @@ namespace SpreadsheetUtilities
         {
         }
 
+        private IEnumerable<string> getDependeeList(string s)
+        {
+            List<string> dependeeList = new List<string>();
+            List<string> keyLists = new(nodesGraph.Keys);
+            foreach(string eachKey in keyLists)
+            {
+                if (nodesGraph[eachKey].Contains(s))
+                    dependeeList.Add(eachKey);
+            }
+            return dependeeList;
+        }
+
     }
 }
+
