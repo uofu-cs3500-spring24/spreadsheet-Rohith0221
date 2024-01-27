@@ -59,6 +59,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int Size
         {
+            
             get
             {
                 int totalOrderedPairsCount = 0;

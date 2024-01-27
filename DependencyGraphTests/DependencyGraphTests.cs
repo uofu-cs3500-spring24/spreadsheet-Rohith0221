@@ -261,5 +261,45 @@ namespace DevelopmentTests
             }
         }
 
+        [TestMethod]
+        public void checkIfSimultaneouslyDependentsAndDependees_Removed()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.AddDependency("a", "b");
+            dg.AddDependency("c", "b");
+            dg.AddDependency("e", "b");
+            dg.AddDependency("f", "b");
+
+            List <string>dependee = new();
+            dependee.Add("a");
+            dependee.Add("c");
+            dependee.Add("e");
+            dependee.Add("f");
+
+            Assert.AreEqual(dependee.Count(), dg.GetDependees("b").Count());
+            for (int i = 0; i < dependee.Count(); i++)
+                Assert.AreEqual(dependee[i].ToString(), dg.GetDependees("b").ToArray()[i].ToString());
+            //Assert.AreEqual(dependee.ToString,dg.GetDependees("b").ToString);
+            Console.WriteLine(dg.GetDependents("a").ToString);
+            Console.WriteLine(dg.GetDependents("c").ToString);
+            Console.WriteLine(dg.GetDependents("e").ToString);
+            Console.WriteLine(dg.GetDependents("f").ToString);
+
+
+            List<string> newDependee = new List<string>();
+            newDependee.Add("i");
+            newDependee.Add("j");
+            newDependee.Add("k");
+
+            dg.ReplaceDependees("b", newDependee);
+
+            
+            Console.WriteLine(dg.GetDependees("b").ToString);
+            Console.WriteLine(dg.GetDependents("i").ToString);
+            Console.WriteLine(dg.GetDependents("j").ToString);
+            Console.WriteLine(dg.GetDependents("k").ToString);
+
+        }
+
     }
 }
