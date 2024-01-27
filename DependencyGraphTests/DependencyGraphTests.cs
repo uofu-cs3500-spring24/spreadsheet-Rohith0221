@@ -7,9 +7,16 @@ using SpreadsheetUtilities;
 namespace DevelopmentTests
 {
     /// <summary>
+    ///
+    /// Author  :          Rohith V
+    /// Project Created : Jan 27,2023
+    /// Partner :           None
+    ///
+    /// 
     ///This is a test class for DependencyGraphTest and is intended
     ///to contain all DependencyGraphTest Unit Tests
     ///</summary>
+    ///
     [TestClass()]
     public class DependencyGraphTest
     {
@@ -261,6 +268,9 @@ namespace DevelopmentTests
             }
         }
 
+        /// <summary>
+        ///  Checks if Dependents and Dependees are properly connected and replaced
+        /// </summary>
         [TestMethod]
         public void checkIfSimultaneouslyDependentsAndDependees_Removed()
         {
