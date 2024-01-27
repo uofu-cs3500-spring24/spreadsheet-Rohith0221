@@ -5,6 +5,7 @@
 //               (Clarified names in solution/project structure.)
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -41,11 +42,15 @@ namespace SpreadsheetUtilities
     /// </summary>
     public class DependencyGraph
     {
+        private Dictionary<string, HashSet<string>> nodes;
+
+
         /// <summary>
         /// Creates an empty DependencyGraph.
         /// </summary>
         public DependencyGraph()
         {
+            nodes = new();
         }
 
 
@@ -54,7 +59,13 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int Size
         {
-            get { return 0; }
+            get {
+                List<string> keyList = nodes.Keys;
+                foreach(string key in nodes.Keys)
+                {
+                    
+                }
+                return nodes.Count; }
         }
 
 
@@ -67,7 +78,8 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int this[string s]
         {
-            get { return 0; }
+
+            get { return this.GetDependees(s).Count(); }
         }
 
 
@@ -76,6 +88,8 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependents(string s)
         {
+            if (nodes[s].Count != 0)
+                return true;
             return false;
         }
 
@@ -85,6 +99,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependees(string s)
         {
+
             return false;
         }
 
@@ -94,7 +109,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return null;
+            return nodes[s];
         }
 
         /// <summary>
@@ -118,6 +133,8 @@ namespace SpreadsheetUtilities
         /// <param name="t"> t cannot be evaluated until s is</param>        /// 
         public void AddDependency(string s, string t)
         {
+            nodes.Add(s, new HashSet<string>());
+            nodes[s].Add(t);
         }
 
 
@@ -128,6 +145,10 @@ namespace SpreadsheetUtilities
         /// <param name="t"></param>
         public void RemoveDependency(string s, string t)
         {
+            if (nodes[s].Contains(t))
+            {
+                nodes[s].Remove(t);
+            }
         }
 
 
@@ -137,6 +158,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+
         }
 
 
@@ -149,5 +171,4 @@ namespace SpreadsheetUtilities
         }
 
     }
-
 }
