@@ -374,7 +374,9 @@ namespace DevelopmentTests
 
         }
 
-
+        /// <summary>
+        /// checks HasDependee method for non-empty list
+        /// </summary>
         [TestMethod]
         public void HasDependeeTrue()
         {
@@ -388,6 +390,10 @@ namespace DevelopmentTests
             Assert.IsTrue(dg.HasDependees("f"));
 
         }
+
+        /// <summary>
+        ///  Checks HasDependee method for empty list
+        /// </summary>
         [TestMethod]
         public void HasDependeeFalse()
         {
@@ -401,6 +407,76 @@ namespace DevelopmentTests
             Assert.IsFalse(dg.HasDependees("e"));
 
         }
+
+        /// <summary>
+        ///  Remove dependency for non-existent connection
+        /// </summary>
+
+        [TestMethod]
+        public void RemoveDependency_For_NonExistentDependency()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.AddDependency("l", "o");
+            Assert.AreEqual(1, dg.Size);
+            dg.RemoveDependency("l", "");
+
+            // checks size again after trying to remove non-existent connection
+            Assert.AreEqual(1, dg.Size);
+        }
+
+        [TestMethod]
+        public void replaceDependents_For_NonEmptyList()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.AddDependency("a", "b");
+            dg.AddDependency("a", "c");
+            dg.AddDependency("a", "d");
+
+            List<string> newDependent = new List<string>();
+            newDependent.Add("e");
+            newDependent.Add("f");
+            newDependent.Add("g");
+
+            dg.ReplaceDependents("a", newDependent);
+
+            for (int i = 0; i < 3; i++)
+                Assert.AreEqual(newDependent[i].ToString(), dg.GetDependents("a").ToArray()[i].ToString());
+        }
+
+        [TestMethod]
+        public void replaceDependents_For_EmptyList()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.AddDependency("b","a");
+
+            List<string> newDependent = new List<string>();
+            newDependent.Add("e");
+            newDependent.Add("f");
+            newDependent.Add("g");
+
+            dg.ReplaceDependents("a", newDependent);
+
+            for (int i = 0; i < 3; i++)
+                Assert.AreEqual(newDependent[i].ToString(), dg.GetDependents("a").ToArray()[i].ToString());
+        }
+
+        [TestMethod]
+        public void replaceDependees_For_EmptyList()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.AddDependency("a", "b");
+
+            List<string> newDependeeList = new List<string>();
+            newDependeeList.Add("e");
+            newDependeeList.Add("f");
+            newDependeeList.Add("g");
+
+            dg.ReplaceDependents("a", newDependeeList);
+
+            for (int i = 0; i < 3; i++)
+                Assert.AreEqual(newDependeeList[i].ToString(), dg.GetDependents("a").ToArray()[i].ToString());
+        }
+
 
     }
 }
