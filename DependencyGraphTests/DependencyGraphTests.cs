@@ -273,7 +273,7 @@ namespace DevelopmentTests
         ///  Checks if Dependents and Dependees are properly connected and replaced
         /// </summary>
         [TestMethod]
-        public void checkIfSimultaneouslyDependentsAndDependees_Removed()
+        public void checkIfSimultaneouslyDependentsAndDependees_Replaced()
         {
             DependencyGraph dg = new DependencyGraph();
             dg.AddDependency("a", "b");
@@ -281,7 +281,7 @@ namespace DevelopmentTests
             dg.AddDependency("e", "b");
             dg.AddDependency("f", "b");
 
-            List <string>dependee = new();
+            List<string> dependee = new();
             dependee.Add("a");
             dependee.Add("c");
             dependee.Add("e");
@@ -290,11 +290,11 @@ namespace DevelopmentTests
             Assert.AreEqual(dependee.Count(), dg.GetDependees("b").Count());
             for (int i = 0; i < dependee.Count(); i++)
                 Assert.AreEqual(dependee[i].ToString(), dg.GetDependees("b").ToArray()[i].ToString());
-            //Assert.AreEqual(dependee.ToString,dg.GetDependees("b").ToString);
-            Console.WriteLine(dg.GetDependents("a").ToString);
-            Console.WriteLine(dg.GetDependents("c").ToString);
-            Console.WriteLine(dg.GetDependents("e").ToString);
-            Console.WriteLine(dg.GetDependents("f").ToString);
+
+            Assert.AreEqual(new HashSet<string> { "b" }.ToString(), dg.GetDependents("a").ToString());
+            Assert.AreEqual(new HashSet<string> { "b" }.ToString(), dg.GetDependents("c").ToString());
+            Assert.AreEqual(new HashSet<string> { "b" }.ToString(), dg.GetDependents("e").ToString());
+            Assert.AreEqual(new HashSet<string> { "b" }.ToString(), dg.GetDependents("f").ToString());
 
 
             List<string> newDependee = new List<string>();
@@ -304,13 +304,104 @@ namespace DevelopmentTests
 
             dg.ReplaceDependees("b", newDependee);
 
-            
-            Console.WriteLine(dg.GetDependees("b").ToString);
-            Console.WriteLine(dg.GetDependents("i").ToString);
-            Console.WriteLine(dg.GetDependents("j").ToString);
-            Console.WriteLine(dg.GetDependents("k").ToString);
+            List<string> dependeeList = (List<string>)dg.GetDependees("b");
+
+            for (int i = 0; i < 3; i++)
+                Assert.AreEqual(newDependee[i].ToString(), dependeeList[i].ToString());
+
+            Assert.AreEqual(new List<string> { }.ToArray().ToString(), dg.GetDependees("a").ToArray().ToString());
+            Assert.AreEqual(new List<string> { }.ToArray().ToString(), dg.GetDependees("i").ToArray().ToString());
+            Assert.AreEqual(new List<string> { }.ToArray().ToString(), dg.GetDependees("j").ToArray().ToString());
+            Assert.AreEqual(new List<string> { }.ToArray().ToString(), dg.GetDependees("k").ToArray().ToString());
+        }
+
+        [TestMethod]
+        public void tryAddDuplicateDependency()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.AddDependency("a", "b");
+            dg.AddDependency("a", "b");
+
+            Assert.AreEqual(1, dg.Size);
+        }
+
+        [TestMethod]
+        public void tryRemovingDependencyForEmptyDependee()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.AddDependency("a", "");
+
+            Assert.AreEqual(1, dg.Size);
+            dg.RemoveDependency("a", "");
+            Assert.AreEqual(0, dg.Size);
+        }
+
+        [TestMethod]
+        public void checkIndexerMethod()
+        {
+            DependencyGraph dg = new();
+            dg.AddDependency("a", "b");
+            dg.AddDependency("c", "b") ;
+            dg.AddDependency("d", "b");
+
+            Assert.AreEqual(3, dg["b"]);
+
+        }
+
+        [TestMethod]
+        public void HasDependentsTrue()
+        {
+            DependencyGraph dg = new();
+            dg.AddDependency("a", "b");
+            dg.AddDependency("c", "b");
+            dg.AddDependency("d", "b");
+
+            Assert.IsTrue(dg.HasDependents("d"));
+            Assert.IsTrue(dg.HasDependents("c"));
+            Assert.IsTrue(dg.HasDependents("a"));
+
+        }
+
+        [TestMethod]
+        public void HasDependentsFalse()
+        {
+            DependencyGraph dg = new();
+            dg.AddDependency("a", "b");
+            dg.AddDependency("c", "b");
+            dg.AddDependency("d", "b");
+
+            Assert.IsFalse(dg.HasDependents("b"));
+
+        }
+
+
+        [TestMethod]
+        public void HasDependeeTrue()
+        {
+            DependencyGraph dg = new();
+            dg.AddDependency("a", "b");
+            dg.AddDependency("c", "d");
+            dg.AddDependency("e", "f");
+
+            Assert.IsTrue(dg.HasDependees("b"));
+            Assert.IsTrue(dg.HasDependees("d"));
+            Assert.IsTrue(dg.HasDependees("f"));
+
+        }
+        [TestMethod]
+        public void HasDependeeFalse()
+        {
+            DependencyGraph dg = new();
+            dg.AddDependency("a", "b");
+            dg.AddDependency("c", "d");
+            dg.AddDependency("e", "f");
+
+            Assert.IsFalse(dg.HasDependees("a"));
+            Assert.IsFalse(dg.HasDependees("c"));
+            Assert.IsFalse(dg.HasDependees("e"));
 
         }
 
     }
 }
+

@@ -120,7 +120,7 @@ namespace SpreadsheetUtilities
         {
             if(nodesGraph.ContainsKey(s))
                 return nodesGraph[s];
-            return null;
+            return new HashSet<string>();
         }
 
         /// <summary>
