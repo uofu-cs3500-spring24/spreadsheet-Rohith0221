@@ -477,6 +477,64 @@ namespace DevelopmentTests
                 Assert.AreEqual(newDependeeList[i].ToString(), dg.GetDependents("a").ToArray()[i].ToString());
         }
 
+        [TestMethod]
+        public void Add_AndRemovingDependency_AndReplacing()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.AddDependency("a", "b");
+            Assert.AreEqual(1, dg.Size);
+            dg.RemoveDependency("a", "b");
+            Assert.AreEqual(0, dg.Size);
+            dg.ReplaceDependents("a", new List<string> { "c", "d", "e", "f" });
+            Assert.AreEqual(4, dg.Size);
+        }
+
+        [TestMethod]
+        public void replaceDependents_AndReplaceDependees_checkIfActuallyReplaced()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.AddDependency("a", "b");
+            dg.AddDependency("a", "c");
+            dg.AddDependency("a", "d");
+
+            dg.AddDependency("b", "e");
+            dg.AddDependency("b", "f");
+            dg.AddDependency("b", "g");
+
+            Assert.AreEqual(0, dg["a"]);
+            dg.ReplaceDependees("a", new List<string> { "b" });
+            Assert.AreEqual(1, dg["a"]);
+            dg.ReplaceDependees("b", new List<string> { "", "b", "c" });
+            Assert.IsFalse(dg.GetDependees("b").Contains("a"));
+            Assert.AreEqual(3,dg.GetDependees("b").Count());
+
+        }
+
+        [TestMethod]
+        public void tryReplaceDuplicateDependents()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.AddDependency("a", "b");
+            dg.AddDependency("a", "c");
+            dg.AddDependency("a", "d");
+
+            dg.ReplaceDependents("a", new List<string> { "a", "a", "b", "b", "c" });
+            Assert.AreEqual(3, dg.GetDependents("a").Count());
+        }
+
+        [TestMethod]
+        public void tryReplaceDuplicateDependees()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.AddDependency("a", "b");
+            dg.AddDependency("c", "b");
+            dg.AddDependency("d", "b");
+
+            dg.ReplaceDependees("b", new List<string> { "e", "d", "e", "b", "c" });
+            Assert.AreEqual(4, dg.GetDependees("b").Count());
+            Assert.IsFalse(dg.GetDependees("b").Contains("a"));
+        }
+
 
     }
 }
