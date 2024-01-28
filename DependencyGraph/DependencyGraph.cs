@@ -4,16 +4,25 @@
 //               (Clarified meaning of dependent and dependee.)
 //               (Clarified names in solution/project structure.)
 
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+
 namespace SpreadsheetUtilities
 {
 
     /// <summary>
+    ///
+    /// Author      : Rohith Veeramachaneni
+    /// Partner     : None
+    /// Date Created: Jan 27,2023
+    ///
+    ///
+    /// 
     /// (s1,t1) is an ordered pair of strings
     /// t1 depends on s1; s1 must be evaluated before t1
     /// 
@@ -141,10 +150,12 @@ namespace SpreadsheetUtilities
         /// <param name="t"> t cannot be evaluated until s is</param>        /// 
         public void AddDependency(string s, string t)
         {
+            // checks if string s is already existent in dictionary
             if (!nodesGraph.ContainsKey(s))
             {
                 nodesGraph.Add(s, new HashSet<string>());
                 nodesGraph[s].Add(t);
+                // adds another empty dependency connection for string t given 
                 if (!nodesGraph.ContainsKey(t))
                     nodesGraph.Add(t, new HashSet<string>());
             }
@@ -164,6 +175,8 @@ namespace SpreadsheetUtilities
         /// <param name="t"></param>
         public void RemoveDependency(string s, string t)
         {
+            // checks if both given string s and t are existent in dictionary before trying
+            // to delete them
             if (nodesGraph.ContainsKey(s) && nodesGraph[s].Contains(t))
             {
                 nodesGraph[s].Remove(t);
@@ -251,9 +264,12 @@ namespace SpreadsheetUtilities
         private IEnumerable<string> getDependeeList(string s)
         {
             List<string> dependeeList = new List<string>();
+            // gets all keys in the dictionary
                 List<string> keyLists = new(nodesGraph.Keys);
                 foreach (string eachKey in keyLists)
                 {
+                // for each key checks if string s is a dependent and if so,
+                // then key is considered as a dependee and added in dependeeList
                     if (nodesGraph[eachKey].Contains(s))
                         dependeeList.Add(eachKey);
                 }
