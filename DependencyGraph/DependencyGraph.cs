@@ -141,14 +141,18 @@ namespace SpreadsheetUtilities
         /// <param name="t"> t cannot be evaluated until s is</param>        /// 
         public void AddDependency(string s, string t)
         {
-            if (s!=null && !nodesGraph.ContainsKey(s))
+            if (!nodesGraph.ContainsKey(s))
             {
                 nodesGraph.Add(s, new HashSet<string>());
                 nodesGraph[s].Add(t);
+                if (!nodesGraph.ContainsKey(t))
+                    nodesGraph.Add(t, new HashSet<string>());
             }
             else
             {
                 nodesGraph[s].Add(t);
+                if (!nodesGraph.ContainsKey(t))
+                    nodesGraph.Add(t, new HashSet<string>());
             }
         }
 
@@ -160,7 +164,7 @@ namespace SpreadsheetUtilities
         /// <param name="t"></param>
         public void RemoveDependency(string s, string t)
         {
-            if (s!=null && nodesGraph.ContainsKey(s) && nodesGraph[s].Contains(t))
+            if (nodesGraph.ContainsKey(s) && nodesGraph[s].Contains(t))
             {
                 nodesGraph[s].Remove(t);
             }
@@ -173,7 +177,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
-            if (s!=null && nodesGraph.ContainsKey(s))
+            if (nodesGraph.ContainsKey(s))
             {
                 // resests the dependents of key string s if any exists
                 if (nodesGraph[s].Count() != 0)
@@ -194,12 +198,18 @@ namespace SpreadsheetUtilities
             {
                 // checks if needed to iterate through given IEnumerable and adds them to the
                 // string key s into the dictionary
-                if (s!=null && newDependents.Count() != 0)
+                if (newDependents.Count() != 0)
                 {
                     foreach (string newDependent in newDependents)
                         AddDependency(s, newDependent);
                 }
-                else
+                else if (newDependents.Count() != 0)
+                {
+                    foreach (string newDependent in newDependents)
+                        AddDependency(s, newDependent);
+
+                }
+                else if (newDependents.Count()==0)
                     nodesGraph.Add(s,new HashSet<string>());
             }
         }
@@ -211,8 +221,6 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
-            if (s != null)
-            {
                 // removes all the dependee connection for the given dependee string s
                 foreach (string dependee in getDependeeList(s))
                 {
@@ -232,7 +240,6 @@ namespace SpreadsheetUtilities
                         nodesGraph[newDependee].Add(s);
                     }
                 }
-            }
         }
 
         /// <summary>
@@ -244,15 +251,12 @@ namespace SpreadsheetUtilities
         private IEnumerable<string> getDependeeList(string s)
         {
             List<string> dependeeList = new List<string>();
-            if (s != null)
-            {
                 List<string> keyLists = new(nodesGraph.Keys);
                 foreach (string eachKey in keyLists)
                 {
                     if (nodesGraph[eachKey].Contains(s))
                         dependeeList.Add(eachKey);
                 }
-            }
             return dependeeList;
         }
 
