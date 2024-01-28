@@ -15,10 +15,14 @@ Copyright:  CS 3500 and Rohith Veeramachaneni - This work may not be copied for 
 # Overview of the Spreadsheet functionality
 
 The Spreadsheet program is currently capable of evaluating a formula and also validating if it's good or bad
-Future extensions are using Graph to make it function as a cell in Spreadsheet program
+Future extensions are using Graph to make it function as a cell in Spreadsheet program.Added a new GraphDependencyLibrary
+to simulate cells like as in a spreadsheet establishing dependency between two cells
 
 # Time Expenditures:
 
     1. Assignment One:   Predicted Hours:          13        Actual Hours:   11
+
+    2. Assignment Two:   Predicted Hours:          12        Actual Hours:   10
+
 
 
