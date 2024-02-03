@@ -45,6 +45,9 @@ namespace SpreadsheetUtilities
   /// </summary>
   public class Formula
   {
+        private string normalisedAndValidatedString;
+        private List<string> normalisedTokens = new();
+
     /// <summary>
     /// Creates a Formula from a string that consists of an infix expression written as
     /// described in the class comment.  If the expression is syntactically invalid,
@@ -83,33 +86,42 @@ namespace SpreadsheetUtilities
     public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
     {
             List<string> tokens=GetTokens(formula).ToList();
-            List<string>normalisedTokens=normalise(normalize, tokens);
-            validateTokens(normalisedTokens);
+            normalisedTokens=normalise(normalize, tokens);
+            Boolean validation=validateTokens(normalisedTokens,isValid);
+            normalisedAndValidatedString = string.Join("",normalisedTokens);
     }
 
-    /// <summary>
-    /// Evaluates this Formula, using the lookup delegate to determine the values of
-    /// variables.  When a variable symbol v needs to be determined, it should be looked up
-    /// via lookup(normalize(v)). (Here, normalize is the normalizer that was passed to 
-    /// the constructor.)
-    /// 
-    /// For example, if L("x") is 2, L("X") is 4, and N is a method that converts all the letters 
-    /// in a string to upper case:
-    /// 
-    /// new Formula("x+7", N, s => true).Evaluate(L) is 11
-    /// new Formula("x+7").Evaluate(L) is 9
-    /// 
-    /// Given a variable symbol as its parameter, lookup returns the variable's value 
-    /// (if it has one) or throws an ArgumentException (otherwise).
-    /// 
-    /// If no undefined variables or divisions by zero are encountered when evaluating 
-    /// this Formula, the value is returned.  Otherwise, a FormulaError is returned.  
-    /// The Reason property of the FormulaError should have a meaningful explanation.
-    ///
-    /// This method should never throw an exception.
-    /// </summary>
-    public object Evaluate(Func<string, double> lookup)
+        /// <summary>
+        /// Evaluates this Formula, using the lookup delegate to determine the values of
+        /// variables.  When a variable symbol v needs to be determined, it should be looked up
+        /// via lookup(normalize(v)). (Here, normalize is the normalizer that was passed to 
+        /// the constructor.)
+        /// 
+        /// For example, if L("x") is 2, L("X") is 4, and N is a method that converts all the letters 
+        /// in a string to upper case:
+        /// 
+        /// new Formula("x+7", N, s => true).Evaluate(L) is 11
+        /// new Formula("x+7").Evaluate(L) is 9
+        /// 
+        /// Given a variable symbol as its parameter, lookup returns the variable's value 
+        /// (if it has one) or throws an ArgumentException (otherwise).
+        /// 
+        /// If no undefined variables or divisions by zero are encountered when evaluating 
+        /// this Formula, the value is returned.  Otherwise, a FormulaError is returned.  
+        /// The Reason property of the FormulaError should have a meaningful explanation.
+        ///
+        /// This method should never throw an exception.
+        /// </summary>
+        public object Evaluate(Func<string, double> lookup)
     {
+            try
+            {
+
+            }
+            catch(ArgumentException)
+            {
+                throw new FormulaError
+            }
       return null;
     }
 
@@ -126,8 +138,16 @@ namespace SpreadsheetUtilities
     /// </summary>
     public IEnumerable<String> GetVariables()
     {
-
-      return null;
+      List<string> normalisedVariableTokens = new();
+      foreach(string token in normalisedTokens)
+            {
+                if (token.Equals("+") || token.Equals("-") || token.Equals("*")
+                || token.Equals("/") || token.Equals("(") || token.Equals(")")
+                || Double.TryParse(token, out double castValue))
+                    continue;
+                normalisedVariableTokens.Add(token);
+            }
+      return normalisedVariableTokens;
     }
 
     /// <summary>
@@ -169,7 +189,9 @@ namespace SpreadsheetUtilities
     /// </summary>
     public override bool Equals(object? obj)
     {
-      return false;
+       if (obj == null && !(obj is Formula))
+                return false;
+       return true;
     }
 
     /// <summary>
@@ -246,13 +268,13 @@ namespace SpreadsheetUtilities
             int opening_bracesCount = 0;
 
             // Rule 5 Starting token rule violated
-            if (!(tokensToBeValidated[0].Equals("(") || isValid(tokensToBeValidated[0])
+            if (!(tokensToBeValidated[0].Equals("(") || validateIsVariable(tokensToBeValidated[0])
                 || Double.TryParse(tokensToBeValidated[0], out double doubleValue)))
                 throw new FormatException($"Starting token rule violated : ${tokensToBeValidated[0]} found");
             // Rule 6 Ending token rule violated
-            else if(!(tokensToBeValidated[tokensToBeValidated.Count-1].Equals(")") || isValid(tokensToBeValidated[tokensToBeValidated.Count - 1])
+            else if(!(tokensToBeValidated[tokensToBeValidated.Count-1].Equals(")") || validateIsVariable(tokensToBeValidated[tokensToBeValidated.Count - 1])
                 || Double.TryParse(tokensToBeValidated[tokensToBeValidated.Count - 1],out double doubleCastValue)))
-                throw new FormatException($"Ending token rule violated : ${tokensToBeValidated[0]} found");
+                throw new FormatException($"Ending token rule violated : {tokensToBeValidated[tokensToBeValidated.Count - 1]} found");
 
             // Rule 2 : Empty formula with no tokens
             if (tokensToBeValidated.Count == 0)
@@ -286,13 +308,14 @@ namespace SpreadsheetUtilities
                 {
                     if (i + 1 > tokensToBeValidated.Count())
                         throw new FormatException(" No further tokens found !");
-                    if (checkTokenForFollowingOperator(tokensToBeValidated, i + 1))
+                    if (!checkTokenForFollowingOperator(tokensToBeValidated, i + 1))
                         throw new FormatException(" Token following " + tokensToBeValidated[i]
                             + " doesn't have valid token");
                 }
 
                 // Rule 8 Extra following rule
-                else if (!checkTokenForExtraRule(tokensToBeValidated, i + 1))
+                else if (i!=tokensToBeValidated.Count()-1
+                    &&!checkTokenForExtraRule(tokensToBeValidated, i + 1))
                     throw new FormatException("Invalid token found after current token " + tokensToBeValidated[i]);
             }
             return true;
@@ -300,13 +323,12 @@ namespace SpreadsheetUtilities
 
     private List<string> normalise(Func<string,string>normalize,IEnumerable<string> tokenEnumerator)
         {
-            List<string> normalisedTokens = new();
            foreach(string token in tokenEnumerator)
             {
                 if (token.Equals("+") || token.Equals("-") || token.Equals("*")
                    || token.Equals("/") || token.Equals(""))
                 {
-                    normalisedTokens.Add(normalize(token));
+                    normalisedTokens.Add(token);
                     continue;
                 }
                 normalisedTokens.Add(normalize(token));
