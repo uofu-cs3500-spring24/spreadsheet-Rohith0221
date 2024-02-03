@@ -254,7 +254,7 @@ namespace SpreadsheetUtilities
                 || Double.TryParse(tokensToBeValidated[tokensToBeValidated.Count - 1],out double doubleCastValue)))
                 throw new FormatException($"Ending token rule violated : ${tokensToBeValidated[0]} found");
 
-            // Empty formula with no tokens
+            // Rule 2 : Empty formula with no tokens
             if (tokensToBeValidated.Count == 0)
                 throw new FormatException(" No token provided ! \n Provide a new non-empty token");
 
@@ -269,7 +269,7 @@ namespace SpreadsheetUtilities
                 if (tokensToBeValidated[i].Equals(")"))
                     closing_bracesCount += 1;
 
-                // checks if the parsed token is any of these,if not throws exception
+                // Rule 1 :checks if the parsed token is any of these,if not throws exception
                 if (!checkIfAnyValidToken(tokensToBeValidated[i]))
                     throw new FormatException(" Unaccepted token found. \n Provide a valid token");
 
@@ -279,6 +279,7 @@ namespace SpreadsheetUtilities
                 // Rule 4 Balanced Parenthesis rule
                 else if (!(closing_bracesCount == opening_bracesCount))
                     throw new FormatException("Unequal number of parenthesis found ");
+                // Rule 7 Parenthesi/Operator following rule
                 else if (tokensToBeValidated[i].Equals("+") || tokensToBeValidated[i].Equals("-")
                     || tokensToBeValidated[i].Equals("*") || tokensToBeValidated[i].Equals("/")
                     || tokensToBeValidated[i].Equals("("))
@@ -290,10 +291,11 @@ namespace SpreadsheetUtilities
                             + " doesn't have valid token");
                 }
 
+                // Rule 8 Extra following rule
                 else if (!checkTokenForExtraRule(tokensToBeValidated, i + 1))
                     throw new FormatException("Invalid token found after current token " + tokensToBeValidated[i]);
             }
-            return false;
+            return true;
         }
 
     private List<string> normalise(Func<string,string>normalize,IEnumerable<string> tokenEnumerator)
