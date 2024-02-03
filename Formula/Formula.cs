@@ -249,33 +249,29 @@ namespace SpreadsheetUtilities
             if (!(tokensToBeValidated[0].Equals("(") || isValid(tokensToBeValidated[0])
                 || Double.TryParse(tokensToBeValidated[0], out double doubleValue)))
                 throw new FormatException($"Starting token rule violated : ${tokensToBeValidated[0]} found");
-            else if(!(tokensToBeValidated[tokensToBeValidated.Count-1].Equals("(") || isValid(tokensToBeValidated[tokensToBeValidated.Count - 1])
+            // Rule 6 Ending token rule violated
+            else if(!(tokensToBeValidated[tokensToBeValidated.Count-1].Equals(")") || isValid(tokensToBeValidated[tokensToBeValidated.Count - 1])
                 || Double.TryParse(tokensToBeValidated[tokensToBeValidated.Count - 1],out double doubleCastValue)))
                 throw new FormatException($"Ending token rule violated : ${tokensToBeValidated[0]} found");
 
+            // Empty formula with no tokens
+            if (tokensToBeValidated.Count == 0)
+                throw new FormatException(" No token provided ! \n Provide a new non-empty token");
 
-                foreach (string token in tokensToBeValidated)
+            for (int i=0;i<tokensToBeValidated.Count();i++)
             {
                 int startTokenIndex = 0;
                 // Error from delegate with given token
-                if (!isValid(token))
-                    throw new FormatException($" isValid delegate found an error with $ {token} ");
-
-                // Empty formula with no tokens
-                if (tokensToBeValidated.Count == 0)
-                    throw new FormatException(" No token provided ! \n Provide a new non-empty token");
-
-
-                if (token.Equals("("))
+                if (!isValid(tokensToBeValidated[i]))
+                    throw new FormatException($" isValid delegate found an error with $ {tokensToBeValidated[i]} ");
+                if (tokensToBeValidated[i].Equals("("))
                     opening_bracesCount += 1;
-                if (token.Equals(")"))
+                if (tokensToBeValidated[i].Equals(")"))
                     closing_bracesCount += 1;
 
-                // checks if the parsed token is any of these if not throws exception
-                if (!(token.Equals("(") || token.Equals(")") || token.Equals("+")
-                   || token.Equals("-") || token.Equals("*") || token.Equals("/")
-                   || Double.TryParse(token, out double castedValue) || validateIsVariable(token)))
-                    throw new FormatException(" Unaccepted token found \n Provide a valid token");
+                // checks if the parsed token is any of these,if not throws exception
+                if (!checkIfAnyValidToken(tokensToBeValidated[i]))
+                    throw new FormatException(" Unaccepted token found. \n Provide a valid token");
 
                 // Rule 3 Right Parenthesis rule
                 if (closing_bracesCount > opening_bracesCount)
@@ -283,40 +279,20 @@ namespace SpreadsheetUtilities
                 // Rule 4 Balanced Parenthesis rule
                 else if (!(closing_bracesCount == opening_bracesCount))
                     throw new FormatException("Unequal number of parenthesis found ");
+                else if (tokensToBeValidated[i].Equals("+") || tokensToBeValidated[i].Equals("-")
+                    || tokensToBeValidated[i].Equals("*") || tokensToBeValidated[i].Equals("/")
+                    || tokensToBeValidated[i].Equals("("))
+                {
+                    if (i + 1 > tokensToBeValidated.Count())
+                        throw new FormatException(" No further tokens found !");
+                    if (checkTokenForFollowingOperator(tokensToBeValidated, i + 1))
+                        throw new FormatException(" Token following " + tokensToBeValidated[i]
+                            + " doesn't have valid token");
+                }
 
+                else if (!checkTokenForExtraRule(tokensToBeValidated, i + 1))
+                    throw new FormatException("Invalid token found after current token " + tokensToBeValidated[i]);
             }
-
-            //        foreach(string token in tokensToBeValidated)
-            //        {
-            //            if (i == 0 && (!((i + 1) >= tokensToBeValidated.Count())) && ((substrings[i].Equals("")) && (substrings[i + 1].Equals("-")
-            //|| (tokensToBeValidated[i + 1].Equals("+"))) && (substrings[i + 2].Equals("(")
-            //|| isVariable(substrings[i + 2]) || (int.TryParse(substrings[i + 2], out int convertedIntValue))
-            //&& convertedIntValue >= 0)))
-            //            {
-            //                throw new ArgumentException(" Bad formula with unary operator found ! ");
-            //            }
-
-            //            else if (i == 0 && (!((i + 1) >= substrings.Length)) && (substrings[i].Equals("-")
-            //                    || (substrings[i].Equals("+"))) && (substrings[i + 1].Equals("(") ||
-            //                    isVariable(substrings[i + 1]) || int.TryParse(substrings[i + 1], out int convertedValue)
-            //                    && convertedValue >= 0))
-            //            {
-            //                throw new ArgumentException(" Bad formula with unary operator found ! ");
-            //            }
-
-            //            if (substrings[i].Equals(""))
-            //                continue;
-
-
-            //            if (substrings[i].Equals("+") || substrings[i].Equals("-") || substrings[i].Equals("/")
-            //                || substrings[i].Equals(")") || substrings[i].Equals("/")
-            //                || substrings[i].Equals("(") || substrings[i].Equals("*")
-            //                || isVariable(substrings[i])
-            //                || (int.TryParse(substrings[i], out int checkConvertedInt) && checkConvertedInt >= 0))
-
-            //        }
-
-            //        return true;
             return false;
         }
 
@@ -339,6 +315,44 @@ namespace SpreadsheetUtilities
     private Boolean validateIsVariable(string variableToBeChecked)
         {
             return Regex.IsMatch(variableToBeChecked, @"^[a-zA-Z_][a-zA-Z0-9_]*$");
+        }
+
+    private Boolean checkTokenForFollowingOperator(List<string> tokensToBeValidated,int followingTokenIndex)
+        {
+            if (!(tokensToBeValidated[followingTokenIndex].Equals("(")
+                || validateIsVariable(tokensToBeValidated[followingTokenIndex])
+                || Double.TryParse(tokensToBeValidated[followingTokenIndex], out double castedValue)))
+                return false;
+            return true;
+        }
+    private Boolean checkTokenForExtraRule(List<string> tokensToBeValidated, int followingTokenIndex)
+        {
+            // If current tokens are closing parenthesis or a Number or a variable
+            if (tokensToBeValidated[followingTokenIndex - 1].Equals(")")
+               || Double.TryParse(tokensToBeValidated[followingTokenIndex-1],out double castValue)
+               || validateIsVariable(tokensToBeValidated[followingTokenIndex-1]))
+            {
+                // checks for following token if its a operator or closing parenthesis
+                if (tokensToBeValidated[followingTokenIndex].Equals("+")
+                   || tokensToBeValidated[followingTokenIndex].Equals("-")
+                   || tokensToBeValidated[followingTokenIndex].Equals("*")
+                   || tokensToBeValidated[followingTokenIndex].Equals("/")
+                   || tokensToBeValidated[followingTokenIndex].Equals(")"))
+                    return true;
+                return false;
+            }
+            return false;
+        }
+
+        private Boolean checkIfAnyValidToken(string token)
+        {
+            if (token.Equals("(") || token.Equals(")")
+               || token.Equals("+") || token.Equals("-") || token.Equals("*")
+               || token.Equals("/")
+               || Double.TryParse(token, out double castedValue)
+               || validateIsVariable(token))
+                return true;
+            return false;       
         }
 
   }
