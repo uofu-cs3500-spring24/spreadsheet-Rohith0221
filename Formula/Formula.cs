@@ -120,7 +120,7 @@ namespace SpreadsheetUtilities
             }
             catch(ArgumentException)
             {
-                throw new FormulaError
+                return new FormulaError("Formula cannot be evaluated!");
             }
       return null;
     }
@@ -162,7 +162,8 @@ namespace SpreadsheetUtilities
     /// </summary>
     public override string ToString()
     {
-      return null;
+      string trimmedFormula = normalisedAndValidatedString.Trim();
+      return trimmedFormula;
     }
 
     /// <summary>
@@ -201,6 +202,8 @@ namespace SpreadsheetUtilities
     /// </summary>
     public static bool operator ==(Formula f1, Formula f2)
     {
+       if (f1.ToString().Equals(f2.ToString()))
+            return true;
       return false;
     }
 
