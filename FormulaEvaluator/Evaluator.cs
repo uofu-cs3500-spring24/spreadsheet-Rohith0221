@@ -52,48 +52,48 @@ public static class Evaluator
         Stack<string> operatorStack = new();
         // trims down leading and trailing whitespaces in given expression
         expression = expression.Trim();
-        string[] substrings =
+        string[] normalisedTokens =
             Regex.Split(expression, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
 
-        for (int i = 0; i < substrings.Length; i++)
+        for (int i = 0; i < normalisedTokens.Length; i++)
         {
             // trims down whitespaced again in the parsed token
-            substrings[i] = substrings[i].Trim();
+            normalisedTokens[i] = normalisedTokens[i].Trim();
 
             // If theres a unary operator,throws an exception as it's considered bad formula
 
             // If after splitting into tokens, first token is an empty space then looks one spot additional to check for
             // improper unary operator 
-            if (i == 0 && (!((i + 1) >= substrings.Length)) && ((substrings[i].Equals("")) && (substrings[i + 1].Equals("-")
-                || (substrings[i + 1].Equals("+"))) && (substrings[i + 2].Equals("(")
-                || isVariable(substrings[i + 2]) || (int.TryParse(substrings[i + 2], out int convertedIntValue))
+            if (i == 0 && (!((i + 1) >= normalisedTokens.Length)) && ((normalisedTokens[i].Equals("")) && (normalisedTokens[i + 1].Equals("-")
+                || (normalisedTokens[i + 1].Equals("+"))) && (normalisedTokens[i + 2].Equals("(")
+                || isVariable(normalisedTokens[i + 2]) || (int.TryParse(normalisedTokens[i + 2], out int convertedIntValue))
                 && convertedIntValue >= 0)))
             {
                 throw new ArgumentException(" Bad formula with unary operator found ! ");
             }
 
-            else if (i == 0 && (!((i + 1) >= substrings.Length)) && (substrings[i].Equals("-")
-                    || (substrings[i].Equals("+"))) && (substrings[i + 1].Equals("(") ||
-                    isVariable(substrings[i + 1]) || int.TryParse(substrings[i + 1], out int convertedValue)
+            else if (i == 0 && (!((i + 1) >= normalisedTokens.Length)) && (normalisedTokens[i].Equals("-")
+                    || (normalisedTokens[i].Equals("+"))) && (normalisedTokens[i + 1].Equals("(") ||
+                    isVariable(normalisedTokens[i + 1]) || int.TryParse(normalisedTokens[i + 1], out int convertedValue)
                     && convertedValue >= 0))
             {
                 throw new ArgumentException(" Bad formula with unary operator found ! ");
             }
 
-            if (substrings[i].Equals(""))
+            if (normalisedTokens[i].Equals(""))
                 continue;
 
 
-            if ( substrings[i].Equals("+") || substrings[i].Equals("-") || substrings[i].Equals("/")
-                || substrings[i].Equals(")") || substrings[i].Equals("/")
-                || substrings[i].Equals("(") || substrings[i].Equals("*")
-                || isVariable(substrings[i])
-                || (int.TryParse(substrings[i], out int checkConvertedInt) && checkConvertedInt >= 0))
+            if ( normalisedTokens[i].Equals("+") || normalisedTokens[i].Equals("-") || normalisedTokens[i].Equals("/")
+                || normalisedTokens[i].Equals(")") || normalisedTokens[i].Equals("/")
+                || normalisedTokens[i].Equals("(") || normalisedTokens[i].Equals("*")
+                || isVariable(normalisedTokens[i])
+                || (int.TryParse(normalisedTokens[i], out int checkConvertedInt) && checkConvertedInt >= 0))
             {
 
 
                 /// If token is an integer
-                if (int.TryParse(substrings[i], out int parsedValue))
+                if (int.TryParse(normalisedTokens[i], out int parsedValue))
                 {
                     /// if operatorStack has either multiplication or division operator, performs right operation
                     /// and pushes result onto valueStack
@@ -125,7 +125,7 @@ public static class Evaluator
                         valueStack.Push(parsedValue);
                 }
                 // If token is a variable , delegate is used to find value of that
-                else if (isVariable(substrings[i]))
+                else if (isVariable(normalisedTokens[i]))
                 {
                     try
                     {
@@ -139,12 +139,12 @@ public static class Evaluator
                                 int poppedInt = valueStack.Pop();
                                 string poppedOperator = operatorStack.Pop();
                                 if (poppedOperator.Equals("*"))
-                                    valueStack.Push(poppedInt * variableEvaluator(substrings[i]));
+                                    valueStack.Push(poppedInt * variableEvaluator(normalisedTokens[i]));
                                 else if (poppedOperator.Equals("/"))
                                 {
                                     try
                                     {
-                                        valueStack.Push(poppedInt / variableEvaluator(substrings[i]));
+                                        valueStack.Push(poppedInt / variableEvaluator(normalisedTokens[i]));
                                     }
                                     catch (Exception)
                                     {
@@ -154,7 +154,7 @@ public static class Evaluator
                             }
                         }
                         else
-                            valueStack.Push(variableEvaluator(substrings[i]));
+                            valueStack.Push(variableEvaluator(normalisedTokens[i]));
                     }
                     catch (Exception e)
                     {
@@ -164,7 +164,7 @@ public static class Evaluator
                 }
 
                 // checks if parsed token is either '+' or '-' operator and if so pushes operator onto the operator stack
-                else if (substrings[i].Equals("+") || substrings[i].Equals("-"))
+                else if (normalisedTokens[i].Equals("+") || normalisedTokens[i].Equals("-"))
                 {
                     if (operatorStack != null && operatorStack.Count != 0)
 
@@ -179,33 +179,33 @@ public static class Evaluator
                                 if (poppedOperator.Equals("+"))
                                 {
                                     valueStack.Push(value1 + value2);
-                                    operatorStack.Push(substrings[i]);
+                                    operatorStack.Push(normalisedTokens[i]);
                                 }
                                 else if (poppedOperator.Equals("-"))
                                 {
                                     valueStack.Push(value2 - value1);
-                                    operatorStack.Push(substrings[i]);
+                                    operatorStack.Push(normalisedTokens[i]);
                                 }
                             }
                             else
-                                operatorStack.Push(substrings[i]);
+                                operatorStack.Push(normalisedTokens[i]);
                         }
                         else
-                            operatorStack.Push(substrings[i]);
+                            operatorStack.Push(normalisedTokens[i]);
                     }
                     else
-                        operatorStack.Push(substrings[i]);
+                        operatorStack.Push(normalisedTokens[i]);
                 }
 
                 // checks if parsed token is either '*' or '/' operator and if so pushes operator onto the operator stack
-                else if (substrings[i].Equals("*") || substrings[i].Equals("/"))
-                    operatorStack.Push(substrings[i]);
+                else if (normalisedTokens[i].Equals("*") || normalisedTokens[i].Equals("/"))
+                    operatorStack.Push(normalisedTokens[i]);
 
-                else if (substrings[i].Equals("("))
-                    operatorStack.Push(substrings[i]);
+                else if (normalisedTokens[i].Equals("("))
+                    operatorStack.Push(normalisedTokens[i]);
 
                 // If top of the opeatorStack is ")" 
-                else if (substrings[i].Equals(")"))
+                else if (normalisedTokens[i].Equals(")"))
                 {
                     // performs the operation by checking for the errors
 
@@ -257,7 +257,7 @@ public static class Evaluator
                 }
             }
             else
-                throw new ArgumentException(" Invalid operator " + substrings[i] + " found !");
+                throw new ArgumentException(" Invalid operator " + normalisedTokens[i] + " found !");
         }
 
         /*

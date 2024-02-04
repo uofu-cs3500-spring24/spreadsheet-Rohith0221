@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -116,12 +117,226 @@ namespace SpreadsheetUtilities
     {
             try
             {
+                Stack<double> valueStack = new();
+                Stack<string> operatorStack = new();
 
-            }
-            catch(ArgumentException)
+                for (int index= 0;index<normalisedTokens.Count();index++)
+                {
+
+                        normalisedTokens[index] = normalisedTokens[index].Trim();
+
+                        // If theres a unary operator,throws an exception as it's considered bad formula
+
+                        // If after splitting into tokens, first token is an empty space then looks one spot additional to check for
+                        // improper unary operator 
+                        //if (index == 0 && (!((index + 1) >= normalisedTokens.Count())) && ((normalisedTokens[index].Equals("")) && (normalisedTokens[index + 1].Equals("-")
+                        //    || (normalisedTokens[index + 1].Equals("+"))) && (normalisedTokens[index + 2].Equals("(")
+                        //    || validateIsVariable(normalisedTokens[index + 2]) || (Double.TryParse(normalisedTokens[index + 2], out Double convertedIntValue))
+                        //    && convertedIntValue >= 0)))
+                        //{
+                        //    throw new ArgumentException(" Bad formula with unary operator found ! ");
+                        //}
+
+                        //else if (index == 0 && (!((index + 1) >= normalisedTokens.Count())) && (normalisedTokens[index].Equals("-")
+                        //        || (normalisedTokens[index].Equals("+"))) && (normalisedTokens[index + 1].Equals("(") ||
+                        //        validateIsVariable(normalisedTokens[index + 1]) || Double.TryParse(normalisedTokens[index + 1], out Double convertedValue)
+                        //        && convertedValue >= 0))
+                        //{
+                        //    throw new ArgumentException(" Bad formula with unary operator found ! ");
+                        //}
+
+                        if (normalisedTokens[index].Equals(""))
+                            continue;
+
+                            /// If token is an integer
+                        if (Double.TryParse(normalisedTokens[index], out double parsedValue))
+                            {
+                                /// if operatorStack has either multiplication or division operator, performs right operation
+                                /// and pushes result onto valueStack
+
+                                if (operatorStack != null && (operatorStack.Count != 0) && ((operatorStack.Peek().Equals("/"))
+                                     || (operatorStack.Peek().Equals("*"))))
+                                {
+                                    if (valueStack != null && valueStack.Count != 0)
+                                    {
+                                        double poppedInt = valueStack.Pop();
+                                        string poppedOperator = operatorStack.Pop();
+                                        if (poppedOperator.Equals("*"))
+                                            valueStack.Push(poppedInt * parsedValue);
+                                        else if (poppedOperator.Equals("/"))
+                                        {
+                                            if (parsedValue == 0.0)
+                                                throw new ArgumentException("Divide by Zero error");
+                                            valueStack.Push(poppedInt / parsedValue);
+                                        }
+                                    }
+                                }
+                                else
+                                    valueStack.Push(parsedValue);
+                            }
+                            // If token is a variable , delegate is used to find value of that
+                            else if (validateIsVariable(normalisedTokens[index]))
+                            {
+                                try
+                                {
+                                    // If operatorStack has '/' or '*'
+                                    if ((operatorStack != null && operatorStack.Count != 0)
+                                       && ((operatorStack.Peek().Equals("/"))
+                                       || (operatorStack.Peek().Equals("*"))))
+                                    {
+                                        if (valueStack != null && valueStack.Count != 0)
+                                        {
+                                            double poppedInt = valueStack.Pop();
+                                            string poppedOperator = operatorStack.Pop();
+                                            if (poppedOperator.Equals("*"))
+                                                valueStack.Push(poppedInt * lookup(normalisedTokens[index]));
+                                            else if (poppedOperator.Equals("/"))
+                                            {
+                                                try
+                                                {
+                                                    valueStack.Push(poppedInt / lookup(normalisedTokens[index]));
+                                                }
+                                                catch (Exception)
+                                                {
+                                                    throw new ArgumentException(" Cannot divide by zero! ");
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                        valueStack.Push(lookup(normalisedTokens[index]));
+                                }
+                                catch (Exception e)
+                                {
+                                    throw new ArgumentException("No value found for given variable !");
+                                }
+
+                            }
+
+                            // checks if parsed token is either '+' or '-' operator and if so pushes operator onto the operator stack
+                            else if (normalisedTokens[index].Equals("+") || normalisedTokens[index].Equals("-"))
+                            {
+                                if (operatorStack != null && operatorStack.Count != 0)
+
+                                {
+                                    if (operatorStack.Peek().Equals("+") || operatorStack.Peek().Equals("-"))
+                                    {
+                                        if (valueStack.Count >= 2)
+                                        {
+                                            double value1 = valueStack.Pop();
+                                            double value2 = valueStack.Pop();
+                                            string poppedOperator = operatorStack.Pop();
+                                            if (poppedOperator.Equals("+"))
+                                            {
+                                                valueStack.Push(value1 + value2);
+                                                operatorStack.Push(normalisedTokens[index]);
+                                            }
+                                            else if (poppedOperator.Equals("-"))
+                                            {
+                                                valueStack.Push(value2 - value1);
+                                                operatorStack.Push(normalisedTokens[index]);
+                                            }
+                                        }
+                                        else
+                                            operatorStack.Push(normalisedTokens[index]);
+                                    }
+                                    else
+                                        operatorStack.Push(normalisedTokens[index]);
+                                }
+                                else
+                                    operatorStack.Push(normalisedTokens[index]);
+                            }
+
+                            // checks if parsed token is either '*' or '/' operator and if so pushes operator onto the operator stack
+                            else if (normalisedTokens[index].Equals("*") || normalisedTokens[index].Equals("/"))
+                                operatorStack.Push(normalisedTokens[index]);
+
+                            else if (normalisedTokens[index].Equals("("))
+                                operatorStack.Push(normalisedTokens[index]);
+
+                            // If top of the opeatorStack is ")" 
+                            else if (normalisedTokens[index].Equals(")"))
+                            {
+                                // performs the operation by checking for the errors
+
+                                /// If top of the operatorStack is either "+" or "-"
+                                /// then applies operator to the popped values
+                                if (operatorStack.Count != 0 && valueStack.Count >= 2 &&
+                                    operatorStack.Peek().Equals("+") ||
+                                    operatorStack.Peek().Equals("-"))
+                                {
+                                    double value1 = valueStack.Pop();
+                                    double value2 = valueStack.Pop();
+                                    string poppedOperator = operatorStack.Pop();
+                                    if (poppedOperator.Equals("+"))
+                                        valueStack.Push(value1 + value2);
+                                    else if (poppedOperator.Equals("-"))
+                                        valueStack.Push(value2 - value1);
+                                }
+
+                                // Step 2 if "(" is at top of operator stack, pops it
+                                if (operatorStack != null && operatorStack.Count != 0
+                                    && operatorStack.Peek().Equals("("))
+                                    operatorStack.Pop();
+                                else
+                                    throw new ArgumentException(" ')' operator not found ");
+
+                                /// Step 3
+                                /// If top of the operatorStack is either  "*" or "/"
+                                /// applies the poppedOperator to the values
+                                if (operatorStack != null && operatorStack.Count != 0
+                                    && (operatorStack.Peek().Equals("*") ||
+                                    operatorStack.Peek().Equals("/")))
+                                {
+                                    if (valueStack.Count >= 2)
+                                    {
+                                        double value1 = valueStack.Pop();
+                                        double value2 = valueStack.Pop();
+
+                                        string poppedOperator = operatorStack.Pop();
+
+                                        if (poppedOperator.Equals("*"))
+                                            valueStack.Push(value1 * value2);
+                                        else if (poppedOperator.Equals("/"))
+                                            if (value1 == 0)
+                                                throw new ArgumentException(" Cannot divide by zero ");
+                                            else
+                                                valueStack.Push(value2 / value1);
+                                    }
+                                }
+                        }
+                        else
+                            throw new ArgumentException(" Invalid operator " + normalisedTokens[index] + " found !");
+                    }
+
+                    /*
+                     * These operations happen when the last token has been parsed by looking at both of the stacks and performs 
+                     * needed operation according to the algorithm provided
+                     */
+
+                    if (operatorStack.Count == 0 && valueStack.Count == 1)
+                        return valueStack.Pop();
+
+                    else if (operatorStack.Count == 1 && valueStack.Count == 2 &&
+                        (operatorStack.Peek().Equals("+") || operatorStack.Peek().Equals("-")))
+                    {
+                        String poppedOperator = operatorStack.Pop();
+                        double value1 = valueStack.Pop();
+                        double value2 = valueStack.Pop();
+
+                        if (poppedOperator.Equals("+"))
+                            return value1 + value2;
+                        else if (poppedOperator.Equals("-"))
+                            return value2 - value1;
+                    }
+                }
+            catch(ArgumentException e)
             {
-                return new FormulaError("Formula cannot be evaluated!");
+                if (e.Message.Equals("Divide by Zero error"))
+                    return new FormulaError(" Cannot evaluate as division by zero is not possible!").Reason;
+                return new FormulaError("Formula cannot be evaluated!").Reason;
             }
+
       return null;
     }
 
@@ -314,7 +529,7 @@ namespace SpreadsheetUtilities
             // Rule 5 Starting token rule violated
             if (!(tokensToBeValidated[0].Equals("(") || validateIsVariable(tokensToBeValidated[0])
                 || Double.TryParse(tokensToBeValidated[0], out double doubleValue)))
-                throw new FormatException($"Starting token rule violated : ${tokensToBeValidated[0]} found");
+                throw new FormatException($"Starting token rule violated : {tokensToBeValidated[0]} found");
             // Rule 6 Ending token rule violated
             else if(!(tokensToBeValidated[tokensToBeValidated.Count-1].Equals(")") || validateIsVariable(tokensToBeValidated[tokensToBeValidated.Count - 1])
                 || Double.TryParse(tokensToBeValidated[tokensToBeValidated.Count - 1],out double doubleCastValue)))

@@ -15,10 +15,14 @@ public class UnitTest1
     public void testGetVariables()
     {
         Formula formula = new("x+y+z", s => s.ToUpper(), s=>true);
-        IEnumerator<string> enumerator = formula.GetVariables().GetEnumerator();
-        while(enumerator.MoveNext())
-           Console.WriteLine(enumerator.Current);
-        Formula f = new("");
+        IEnumerator<string>enumerator=formula.GetVariables().GetEnumerator();
+        enumerator.MoveNext();
+        Assert.AreEqual("X",enumerator.Current);
+        enumerator.MoveNext();
+        Assert.AreEqual("Y", enumerator.Current);
+        enumerator.MoveNext();
+        Assert.AreEqual("Z", enumerator.Current);
+
     }
 
     [TestMethod]
@@ -36,4 +40,56 @@ public class UnitTest1
         Formula f2 = new("2.000+x7");
         Assert.IsTrue(f1.Equals(f2));
     }
+
+    [TestMethod]
+    public void testEvaluateUsingLookup()
+    {
+        Formula formula = new Formula("2.0+x7");
+        Assert.AreEqual(9.0,formula.Evaluate(x7=>7.0));
+    }
+
+    [TestMethod]
+    public void testEvaluateForNormalisedFormulaUsingLookup()
+    {
+        Formula formula = new Formula("2.0+x7",s=>s.ToUpper(),s=>true);
+        Assert.AreEqual(9.0, formula.Evaluate(x7 => 7.0));
+    }
+
+    [TestMethod]
+    public void testDivisionByZero()
+    {
+        Formula formula = new Formula("2.0/0.0");
+        Console.WriteLine(formula.Evaluate(null));
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(FormatException))]
+    public void testUnaryError1()
+    {
+        Formula formula = new("+9");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(FormatException))]
+    public void testUnaryError2()
+    {
+        Formula formula = new("-9");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(FormatException))]
+    public void testUnaryError3()
+    {
+        Formula formula = new("*9");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(FormatException))]
+    public void testUnaryError4()
+    {
+        Formula formula = new("/9");
+    }
+
+
+
 }
