@@ -171,4 +171,19 @@ public class UnitTest1
         Assert.AreEqual(30.0, formula.Evaluate(x10=>10));
     }
 
+    // isValid delegate will throw exception if '/'operator is found
+    [TestMethod]
+    [ExpectedException(typeof(FormatException))]
+    public void passingFalseFor_isValidDelegate()
+    {
+        Formula formula = new("2987/30+1", s => s, s => { if (s.Equals("/")) { return false;} return true;});
+    }
+
+    [TestMethod]
+    public void testingEqualSymbolOverloaded()
+    {
+        Formula formula = new("2+x7", s => s.ToUpper(), s => true);
+        Formula spaced = new("2  + X7");
+        Assert.IsTrue(formula.ToString() == spaced.ToString());
+    }
 }
