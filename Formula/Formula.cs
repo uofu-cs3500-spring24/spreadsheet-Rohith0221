@@ -48,6 +48,7 @@ namespace SpreadsheetUtilities
   {
         private string normalisedAndValidatedString;
         private List<string> normalisedTokens = new();
+        private double finalResult = 0;
 
     /// <summary>
     /// Creates a Formula from a string that consists of an infix expression written as
@@ -125,25 +126,6 @@ namespace SpreadsheetUtilities
 
                         normalisedTokens[index] = normalisedTokens[index].Trim();
 
-                        // If theres a unary operator,throws an exception as it's considered bad formula
-
-                        // If after splitting into tokens, first token is an empty space then looks one spot additional to check for
-                        // improper unary operator 
-                        //if (index == 0 && (!((index + 1) >= normalisedTokens.Count())) && ((normalisedTokens[index].Equals("")) && (normalisedTokens[index + 1].Equals("-")
-                        //    || (normalisedTokens[index + 1].Equals("+"))) && (normalisedTokens[index + 2].Equals("(")
-                        //    || validateIsVariable(normalisedTokens[index + 2]) || (Double.TryParse(normalisedTokens[index + 2], out Double convertedIntValue))
-                        //    && convertedIntValue >= 0)))
-                        //{
-                        //    throw new ArgumentException(" Bad formula with unary operator found ! ");
-                        //}
-
-                        //else if (index == 0 && (!((index + 1) >= normalisedTokens.Count())) && (normalisedTokens[index].Equals("-")
-                        //        || (normalisedTokens[index].Equals("+"))) && (normalisedTokens[index + 1].Equals("(") ||
-                        //        validateIsVariable(normalisedTokens[index + 1]) || Double.TryParse(normalisedTokens[index + 1], out Double convertedValue)
-                        //        && convertedValue >= 0))
-                        //{
-                        //    throw new ArgumentException(" Bad formula with unary operator found ! ");
-                        //}
 
                         if (normalisedTokens[index].Equals(""))
                             continue;
@@ -307,26 +289,35 @@ namespace SpreadsheetUtilities
                         }
                     }
 
-                    /*
-                     * These operations happen when the last token has been parsed by looking at both of the stacks and performs 
-                     * needed operation according to the algorithm provided
-                     */
+                /*
+                 * These operations happen when the last token has been parsed by looking at both of the stacks and performs 
+                 * needed operation according to the algorithm provided
+                 */
 
-                    if (operatorStack.Count == 0 && valueStack.Count == 1)
-                        return valueStack.Pop();
+                if (operatorStack.Count == 0 && valueStack.Count == 1)
+                {
+                    finalResult = valueStack.Peek();
+                    return valueStack.Pop();
+                }
 
-                    else if (operatorStack.Count == 1 && valueStack.Count == 2 &&
-                        (operatorStack.Peek().Equals("+") || operatorStack.Peek().Equals("-")))
+                else if (operatorStack.Count == 1 && valueStack.Count == 2 &&
+                    (operatorStack.Peek().Equals("+") || operatorStack.Peek().Equals("-")))
+                {
+                    String poppedOperator = operatorStack.Pop();
+                    double value1 = valueStack.Pop();
+                    double value2 = valueStack.Pop();
+
+                    if (poppedOperator.Equals("+"))
                     {
-                        String poppedOperator = operatorStack.Pop();
-                        double value1 = valueStack.Pop();
-                        double value2 = valueStack.Pop();
-
-                        if (poppedOperator.Equals("+"))
-                            return value1 + value2;
-                        else if (poppedOperator.Equals("-"))
-                            return value2 - value1;
+                        finalResult = value1 + value2;
+                        return value1 + value2;
                     }
+                    else if (poppedOperator.Equals("-"))
+                    {
+                        finalResult = value2 - value1;
+                        return value2 - value1;
+                    }
+                }
                 }
             catch(ArgumentException e)
             {
@@ -335,8 +326,7 @@ namespace SpreadsheetUtilities
                 else if (e.Message.Equals("No value found for given variable !"))
                     return new FormulaError(" Delegate cannot find any value for the variable found").Reason;
             }
-
-      return null;
+        return null;
     }
 
     /// <summary>
@@ -414,7 +404,7 @@ namespace SpreadsheetUtilities
                 {
                     if (validateIsVariable(castedFormula.normalisedTokens[i]) && validateIsVariable(normalisedTokens[i]))
                     {
-                        if (validateIsVariable(castedFormula.normalisedTokens[i]).Equals(validateIsVariable(normalisedTokens[i])))
+                        if (castedFormula.normalisedTokens[i].Equals(normalisedTokens[i]))
                             continue;
                         equalityCheck = false;
                         return equalityCheck;
@@ -469,7 +459,9 @@ namespace SpreadsheetUtilities
     /// </summary>
     public static bool operator !=(Formula f1, Formula f2)
     {
-      return false;
+        if (!(f1 == f2))
+            return true;
+        return false;
     }
 
     /// <summary>
@@ -479,7 +471,8 @@ namespace SpreadsheetUtilities
     /// </summary>
     public override int GetHashCode()
     {
-      return 0;
+      
+      return (int)this.finalResult*normalisedTokens.Count()+normalisedAndValidatedString.GetHashCode();
     }
 
     /// <summary>

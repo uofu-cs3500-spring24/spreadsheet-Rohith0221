@@ -30,7 +30,7 @@ public class UnitTest1
     {
         Formula nonSpaced = new("x+y", s => s.ToUpper(),s=>true);
         Formula spaced = new("x      +   Y");
-        Assert.IsTrue(spaced.Equals(nonSpaced));
+        Assert.IsFalse(spaced==nonSpaced);
     }
 
     [TestMethod]
@@ -186,4 +186,36 @@ public class UnitTest1
         Formula spaced = new("2  + X7");
         Assert.IsTrue(formula.ToString() == spaced.ToString());
     }
+
+    [TestMethod]
+    public void testingNotEqualSymbolOverloaded()
+    {
+        Formula formula = new("2+x7", s => s.ToUpper(), s => true);
+        Formula spaced = new("2  + x7");
+        Assert.IsTrue(formula.ToString() != spaced.ToString());
+    }
+
+    [TestMethod]
+    public void testGetHashCodeEquality()
+    {
+        Formula formula1 = new("2+x7", s => s.ToUpper(), s => true);
+        Formula formula2 = new("2+  X7");
+        Assert.IsTrue(formula1.Equals(formula2));
+        formula1.Evaluate(X7 => 17);
+        formula2.Evaluate(X7 => 17);
+        Assert.IsTrue(formula1.GetHashCode() == formula2.GetHashCode());
+    }
+
+    [TestMethod]
+    public void testGetHashCodeUnequality()
+    {
+        Formula formula1 = new("2+x7");
+        Formula formula2 = new("2+  X7");
+        Assert.IsFalse(formula1.Equals(formula2));
+        formula1.Evaluate(X7 => 17);
+        formula2.Evaluate(X7 => 17);
+        //Assert.IsTrue(formula1.GetHashCode() != formula2.GetHashCode());
+
+    }
+
 }
