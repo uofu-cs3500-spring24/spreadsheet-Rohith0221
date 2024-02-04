@@ -62,6 +62,7 @@ public class UnitTest1
         Console.WriteLine(formula.Evaluate(null));
     }
 
+    // Starting operator rule and Unary errors check with all 4 operators
     [TestMethod]
     [ExpectedException(typeof(FormatException))]
     public void testUnaryError1()
@@ -90,6 +91,43 @@ public class UnitTest1
         Formula formula = new("/9");
     }
 
+    // Rule 7 error with invalid closing parenthesis after + operator
 
+    [TestMethod]
+    //[ExpectedException(typeof(FormatException))]
+    public void testFormulaWithMoreClosingBrackets()
+    {
+        Formula formula = new("2*(3+)5)");
+    }
 
+    // Rule 4 error with more open brackets
+    [TestMethod]
+    [ExpectedException(typeof(FormatException))]
+    public void testFormulaWithMoreOpenBrackets()
+    {
+        Formula formula = new("(2*(3+5)");
+    }
+
+    // Rule 3 right parenthesis rule
+    [TestMethod]
+    [ExpectedException(typeof(FormatException))]
+    public void FormulaError()
+    {
+        Formula formula = new("(2)+3)");
+    }
+
+    // Rule 2 Empty Formula with no tokens
+    [TestMethod]
+    [ExpectedException(typeof(FormatException))]
+    public void emptyFormula()
+    {
+        Formula formula = new("");
+    }
+
+    [TestMethod]
+    //[ExpectedException(typeof(FormatException))]
+    public void invalidOperator()
+    {
+        Formula formula = new("9%2");
+    }
 }

@@ -523,6 +523,10 @@ namespace SpreadsheetUtilities
     private Boolean validateTokens(List<string>tokensToBeValidated,
                                           Func<string,bool>isValid)
         {
+            // Rule 2 : Empty formula with no tokens
+            if (tokensToBeValidated.Count == 0)
+                throw new FormatException(" No token provided ! \n Provide a new non-empty token");
+
             int closing_bracesCount = 0;
             int opening_bracesCount = 0;
 
@@ -534,10 +538,6 @@ namespace SpreadsheetUtilities
             else if(!(tokensToBeValidated[tokensToBeValidated.Count-1].Equals(")") || validateIsVariable(tokensToBeValidated[tokensToBeValidated.Count - 1])
                 || Double.TryParse(tokensToBeValidated[tokensToBeValidated.Count - 1],out double doubleCastValue)))
                 throw new FormatException($"Ending token rule violated : {tokensToBeValidated[tokensToBeValidated.Count - 1]} found");
-
-            // Rule 2 : Empty formula with no tokens
-            if (tokensToBeValidated.Count == 0)
-                throw new FormatException(" No token provided ! \n Provide a new non-empty token");
 
             for (int i=0;i<tokensToBeValidated.Count();i++)
             {
@@ -557,9 +557,6 @@ namespace SpreadsheetUtilities
                 // Rule 3 Right Parenthesis rule
                 if (closing_bracesCount > opening_bracesCount)
                     throw new FormatException(") parenthesis found more than number of ( brackets ");
-                // Rule 4 Balanced Parenthesis rule
-                else if (!(closing_bracesCount == opening_bracesCount))
-                    throw new FormatException("Unequal number of parenthesis found ");
                 // Rule 7 Parenthesi/Operator following rule
                 else if (tokensToBeValidated[i].Equals("+") || tokensToBeValidated[i].Equals("-")
                     || tokensToBeValidated[i].Equals("*") || tokensToBeValidated[i].Equals("/")
@@ -577,6 +574,11 @@ namespace SpreadsheetUtilities
                     &&!checkTokenForExtraRule(tokensToBeValidated, i + 1))
                     throw new FormatException("Invalid token found after current token " + tokensToBeValidated[i]);
             }
+
+            // Rule 4 Balanced Parenthesis rule
+            if (closing_bracesCount != opening_bracesCount)
+                throw new FormatException("Unequal number of parenthesis found ");
+
             return true;
         }
 
