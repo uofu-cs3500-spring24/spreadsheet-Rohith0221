@@ -55,14 +55,16 @@ public class UnitTest1
         Assert.AreEqual(9.0, formula.Evaluate(x7 => 7.0));
     }
 
+    // Evaluate method divison error
     [TestMethod]
     public void testDivisionByZero()
     {
         Formula formula = new Formula("2.0/0.0");
-        Console.WriteLine(formula.Evaluate(null));
+        Assert.AreEqual(new FormulaError(" Cannot evaluate as division by zero is not possible!").Reason,
+                         formula.Evaluate(null));
     }
 
-    // Starting operator rule and Unary errors check with all 4 operators
+    // Rule 5 Test:Starting operator rule and Unary errors check with all 4 operators
     [TestMethod]
     [ExpectedException(typeof(FormatException))]
     public void testUnaryError1()
@@ -94,7 +96,7 @@ public class UnitTest1
     // Rule 7 error with invalid closing parenthesis after + operator
 
     [TestMethod]
-    //[ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormatException))]
     public void testFormulaWithMoreClosingBrackets()
     {
         Formula formula = new("2*(3+)5)");
@@ -111,9 +113,10 @@ public class UnitTest1
     // Rule 3 right parenthesis rule
     [TestMethod]
     [ExpectedException(typeof(FormatException))]
-    public void FormulaError()
+    public void IncorrectFormula()
     {
         Formula formula = new("(2)+3)");
+
     }
 
     // Rule 2 Empty Formula with no tokens
@@ -124,10 +127,48 @@ public class UnitTest1
         Formula formula = new("");
     }
 
+    // Rule 6 Ending token rule test
     [TestMethod]
-    //[ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormatException))]
     public void invalidOperator()
     {
-        Formula formula = new("9%2");
+        Formula formula = new("x6$");
     }
+
+    [TestMethod]
+    public void delegateLookupError()
+    {
+        Formula formula = new("2+x7");
+        Assert.AreEqual(new FormulaError(" Delegate cannot find any value for the variable found").Reason,
+                         formula.Evaluate(null));
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(FormatException))]
+    public void formulaFormatError_ExtraFollowingRule_FollowingNumber()
+    {
+        Formula formula = new("2$");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(FormatException))]
+    public void formulaFormatError_ExtraFollowingRule_FollowingVariable()
+    {
+        Formula formula = new("x7%");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(FormatException))]
+    public void formulaFormatError_ExtraFollowingRule_FollowingClosingBracket()
+    {
+        Formula formula = new("(x7)%");
+    }
+
+    [TestMethod]
+    public void formulaOfVariablesWithUnderscores()
+    {
+        Formula formula = new("20+x_10");
+        Assert.AreEqual(30.0, formula.Evaluate(x10=>10));
+    }
+
 }

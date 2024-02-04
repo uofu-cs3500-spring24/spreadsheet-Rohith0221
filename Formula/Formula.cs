@@ -198,7 +198,7 @@ namespace SpreadsheetUtilities
                                                 }
                                                 catch (Exception)
                                                 {
-                                                    throw new ArgumentException(" Cannot divide by zero! ");
+                                                    throw new ArgumentException("Divide by Zero error");
                                                 }
                                             }
                                         }
@@ -305,8 +305,6 @@ namespace SpreadsheetUtilities
                                     }
                                 }
                         }
-                        else
-                            throw new ArgumentException(" Invalid operator " + normalisedTokens[index] + " found !");
                     }
 
                     /*
@@ -334,7 +332,8 @@ namespace SpreadsheetUtilities
             {
                 if (e.Message.Equals("Divide by Zero error"))
                     return new FormulaError(" Cannot evaluate as division by zero is not possible!").Reason;
-                return new FormulaError("Formula cannot be evaluated!").Reason;
+                else if (e.Message.Equals("No value found for given variable !"))
+                    return new FormulaError(" Delegate cannot find any value for the variable found").Reason;
             }
 
       return null;
@@ -542,7 +541,7 @@ namespace SpreadsheetUtilities
             for (int i=0;i<tokensToBeValidated.Count();i++)
             {
                 int startTokenIndex = 0;
-                // Error from delegate with given token
+                // Error from isValid delegate with given token
                 if (!isValid(tokensToBeValidated[i]))
                     throw new FormatException($" isValid delegate found an error with $ {tokensToBeValidated[i]} ");
                 if (tokensToBeValidated[i].Equals("("))
