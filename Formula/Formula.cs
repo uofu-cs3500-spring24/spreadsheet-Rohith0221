@@ -126,10 +126,6 @@ namespace SpreadsheetUtilities
 
                         normalisedTokens[index] = normalisedTokens[index].Trim();
 
-
-                        if (normalisedTokens[index].Equals(""))
-                            continue;
-
                             /// If token is an integer
                         if (Double.TryParse(normalisedTokens[index], out double parsedValue))
                             {
@@ -325,7 +321,7 @@ namespace SpreadsheetUtilities
                 else if (e.Message.Equals("No value found for given variable !"))
                     return new FormulaError(" Delegate cannot find any value for the variable found").Reason;
             }
-        return null;
+        return null;// stub value
     }
 
     /// <summary>
@@ -415,7 +411,7 @@ namespace SpreadsheetUtilities
                         if (castedFormula.normalisedTokens[i].Equals(normalisedTokens[i]))
                             continue;
                         equalityCheck = false;
-                        return equalityCheck;
+                         return equalityCheck;
                     }
                     else 
                     {
@@ -442,8 +438,8 @@ namespace SpreadsheetUtilities
     /// 
     /// </summary>
     public static bool operator ==(Formula f1, Formula f2)
-    {
-       if (f1.ToString().Equals(f2.ToString()))
+    { 
+       if (f1.Equals(f2))
             return true;
       return false;
     }

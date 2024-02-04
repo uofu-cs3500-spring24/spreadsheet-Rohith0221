@@ -261,4 +261,98 @@ public class UnitTest1
         Assert.IsFalse(f1.Equals(f2));
     }
 
+    [TestMethod]
+    public void complexMath()
+    {
+        Formula complex = new Formula("2*(3+x2)/(13)-2+90*120/(x2)-(x2*10)");
+        Assert.AreEqual(980.0,complex.Evaluate(x2 => 10));
+    }
+
+    [TestMethod]
+    public void testEqualityOn_UnequalNumberOfTokenBetweenTwoStrings()
+    {
+        Formula f1 = new("x1+x2");
+        Formula f2 = new("x1");
+
+        Assert.IsFalse(f1.Equals(f2));
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(FormatException))]
+    public void syntaxError()
+    {
+        Formula f = new("A 1");
+
+    }
+
+    [TestMethod]
+    public void evaluationError()
+    {
+        Formula f = new("1/(A1-A1)");
+        Assert.AreEqual(new FormulaError(" Cannot evaluate as division by zero is not possible!").Reason, f.Evaluate(A1 => 1));
+    }
+
+    [TestMethod]
+    public void testDoubleAsStringEquality_usingToStringMethod()
+    {
+        Formula f1 = new("2.0");
+        Formula f2 = new("2");
+        String f2String = f2.ToString();
+        Console.WriteLine(f2String);
+        Assert.IsTrue(f1.Equals(f2));
+        Assert.IsTrue(f1==f2);
+        Console.WriteLine(f1.Equals(f2));
+    }
+
+    [TestMethod]
+    public void testingEqualOnNullObject()
+    {
+        Formula f1 = new("1");
+        String s = null;
+        Assert.IsFalse(f1.Equals(s));
+    }
+
+    [TestMethod]
+    public void equals_DiffersByDoubleValue()
+    {
+        Formula f1 = new("X+1.0");
+        Formula f2 = new("X+2.0");
+        Assert.IsFalse(f1.Equals(f2));
+    }
+
+    [TestMethod]
+    public void equals_DiffersByOperator()
+    {
+        Formula f1 = new("X+1.0");
+        Formula f2 = new("X-1.0");
+        Assert.IsFalse(f1.Equals(f2));
+    }
+
+    [TestMethod]
+    public void notEqualOperatorFalse()
+    {
+        Formula f1 = new("x+1", s => s.ToUpper(), s => true);
+        Formula f2 = new("X+1");
+        Assert.IsFalse(f1 != f2);
+        Assert.IsTrue(f1 == f2);
+    }
+
+    [TestMethod]
+    public void notEqualOperatorTrue()
+    {
+        Formula f1 = new("x+1");
+        Formula f2 = new("X+1");
+        Assert.IsTrue(f1 != f2);
+        Assert.IsFalse(f1 == f2);
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(FormatException))]
+    public void invalidToken()
+    {
+        Formula f = new("x+6$-(2)");
+
+    }
+
+
 }
