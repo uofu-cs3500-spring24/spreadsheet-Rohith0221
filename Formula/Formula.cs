@@ -159,8 +159,17 @@ namespace SpreadsheetUtilities
                             // If token is a variable , delegate is used to find value of that
                             else if (validateIsVariable(normalisedTokens[index]))
                             {
+                        double variableValue = 0;
                                 try
                                 {
+                                   variableValue = lookup(normalisedTokens[index]);
+                                }
+
+                                catch(Exception)
+                                {
+                                  throw new ArgumentException("No value found for given variable !");
+                                }            
+
                                     // If operatorStack has '/' or '*'
                                     if ((operatorStack != null && operatorStack.Count != 0)
                                        && ((operatorStack.Peek().Equals("/"))
@@ -171,27 +180,17 @@ namespace SpreadsheetUtilities
                                             double poppedInt = valueStack.Pop();
                                             string poppedOperator = operatorStack.Pop();
                                             if (poppedOperator.Equals("*"))
-                                                valueStack.Push(poppedInt * lookup(normalisedTokens[index]));
+                                                valueStack.Push(poppedInt * variableValue);
                                             else if (poppedOperator.Equals("/"))
                                             {
-                                                try
-                                                {
-                                                    valueStack.Push(poppedInt / lookup(normalisedTokens[index]));
-                                                }
-                                                catch (Exception)
-                                                {
+                                                if (lookup(normalisedTokens[index])==0.0)
                                                     throw new ArgumentException("Divide by Zero error");
-                                                }
+                                                valueStack.Push(poppedInt / variableValue);
                                             }
                                         }
                                     }
                                     else
-                                        valueStack.Push(lookup(normalisedTokens[index]));
-                                }
-                                catch (Exception e)
-                                {
-                                    throw new ArgumentException("No value found for given variable !");
-                                }
+                                        valueStack.Push(variableValue);
 
                             }
 
@@ -256,17 +255,17 @@ namespace SpreadsheetUtilities
                                         valueStack.Push(value2 - value1);
                                 }
 
-                                // Step 2 if "(" is at top of operator stack, pops it
-                                if (operatorStack != null && operatorStack.Count != 0
-                                    && operatorStack.Peek().Equals("("))
-                                    operatorStack.Pop();
-                                else
-                                    throw new ArgumentException(" ')' operator not found ");
+                        //// Step 2 if "(" is at top of operator stack, pops it
+                        if (operatorStack != null && operatorStack.Count != 0
+                            && operatorStack.Peek().Equals("("))
+                            operatorStack.Pop();
+                        //else
+                        //    throw new ArgumentException(" ')' operator not found ");
 
-                                /// Step 3
-                                /// If top of the operatorStack is either  "*" or "/"
-                                /// applies the poppedOperator to the values
-                                if (operatorStack != null && operatorStack.Count != 0
+                        /// Step 3
+                        /// If top of the operatorStack is either  "*" or "/"
+                        /// applies the poppedOperator to the values
+                        if (operatorStack != null && operatorStack.Count != 0
                                     && (operatorStack.Peek().Equals("*") ||
                                     operatorStack.Peek().Equals("/")))
                                 {
@@ -281,7 +280,7 @@ namespace SpreadsheetUtilities
                                             valueStack.Push(value1 * value2);
                                         else if (poppedOperator.Equals("/"))
                                             if (value1 == 0)
-                                                throw new ArgumentException(" Cannot divide by zero ");
+                                                throw new ArgumentException("Divide by Zero error");
                                             else
                                                 valueStack.Push(value2 / value1);
                                     }
@@ -395,7 +394,7 @@ namespace SpreadsheetUtilities
     public override bool Equals(object? obj)
     {
        bool equalityCheck = true;
-       if (obj == null && !(obj is Formula))
+       if (obj == null || !(obj is Formula))
                 return false;
        Formula castedFormula = (Formula)obj;
             if (castedFormula.normalisedTokens.Count() == this.normalisedTokens.Count())
@@ -415,20 +414,17 @@ namespace SpreadsheetUtilities
                     {
                         if (castedFormula.normalisedTokens[i].Equals(normalisedTokens[i]))
                             continue;
-                        else
-                            equalityCheck = false;
-                            return equalityCheck;
+                        equalityCheck = false;
+                        return equalityCheck;
                     }
                     else 
                     {
                         if (Double.TryParse(castedFormula.normalisedTokens[i], out value1)
                          && Double.TryParse(normalisedTokens[i], out value2))
-                        {
                             if (value1 == value2)
                                 continue;
                             equalityCheck = false;
-                        }
-                        return equalityCheck;
+                            return equalityCheck;
                     }
                 }
             }

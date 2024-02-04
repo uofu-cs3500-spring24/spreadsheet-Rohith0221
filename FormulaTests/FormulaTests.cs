@@ -214,8 +214,51 @@ public class UnitTest1
         Assert.IsFalse(formula1.Equals(formula2));
         formula1.Evaluate(X7 => 17);
         formula2.Evaluate(X7 => 17);
-        //Assert.IsTrue(formula1.GetHashCode() != formula2.GetHashCode());
+        Assert.IsTrue(formula1.GetHashCode() != formula2.GetHashCode());
 
+    }
+
+    [TestMethod]
+    public void evaluateMultiplicationAndDivision()
+    {
+        Formula formula = new("(2*3)/6");
+        Assert.AreEqual(1.0,formula.Evaluate(null));
+    }
+
+    [TestMethod]
+    public void evaluateMultiplicationAndDivisionWithVariables()
+    {
+        Formula formula = new("(2*x1)/x1");
+        Assert.AreEqual(2.0, formula.Evaluate(x1=>3));
+    }
+
+    [TestMethod]
+    public void divideByZeroValueVariable()
+    {
+        Formula formula = new("2/x1");
+        Assert.AreEqual(new FormulaError(" Cannot evaluate as division by zero is not possible!").Reason,formula.Evaluate(x1 => 0));
+    }
+
+    [TestMethod]
+    public void threeOperatorsWithPlus()
+    {
+        Formula formula = new("2*2+3+2");
+        Assert.AreEqual(9.0, formula.Evaluate(null));
+    }
+
+    [TestMethod]
+    public void threeOperatorsWithMinus()
+    {
+        Formula formula = new("2*2-3+2");
+        Assert.AreEqual(3.0, formula.Evaluate(null));
+    }
+
+    [TestMethod]
+    public void equalsMethodForNonFormulaObject()
+    {
+        Formula f1 = new("2");
+        String f2 = "2";
+        Assert.IsFalse(f1.Equals(f2));
     }
 
 }
