@@ -190,9 +190,50 @@ namespace SpreadsheetUtilities
     /// </summary>
     public override bool Equals(object? obj)
     {
+       bool equalityCheck = true;
        if (obj == null && !(obj is Formula))
                 return false;
-       return true;
+       Formula castedFormula = (Formula)obj;
+            if (castedFormula.normalisedTokens.Count() == this.normalisedTokens.Count())
+            {
+                for (int i = 0; i < normalisedTokens.Count(); i++)
+                {
+                    if (validateIsVariable(castedFormula.normalisedTokens[i]) && validateIsVariable(normalisedTokens[i]))
+                    {
+                        if (validateIsVariable(castedFormula.normalisedTokens[i]).Equals(validateIsVariable(normalisedTokens[i])))
+                            continue;
+                        equalityCheck = false;
+                        return equalityCheck;
+                    }
+                     else if (!(Double.TryParse(castedFormula.normalisedTokens[i],out double value1)
+                        && Double.TryParse(normalisedTokens[i], out double value2))
+                       || (validateIsVariable(castedFormula.normalisedTokens[i]) && validateIsVariable(normalisedTokens[i])))
+                    {
+                        if (castedFormula.normalisedTokens[i].Equals(normalisedTokens[i]))
+                            continue;
+                        else
+                            equalityCheck = false;
+                            return equalityCheck;
+                    }
+                    else 
+                    {
+                        if (Double.TryParse(castedFormula.normalisedTokens[i], out value1)
+                         && Double.TryParse(normalisedTokens[i], out value2))
+                        {
+                            if (value1 == value2)
+                                continue;
+                            equalityCheck = false;
+                        }
+                        return equalityCheck;
+                    }
+                }
+            }
+            else
+            {
+                equalityCheck = false;
+                return equalityCheck;
+            }
+       return equalityCheck;
     }
 
     /// <summary>
