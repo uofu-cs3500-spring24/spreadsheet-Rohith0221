@@ -1,6 +1,16 @@
 ﻿namespace FormulaTests;
 using SpreadsheetUtilities;
 
+/// <summary>
+/// 
+/// Author  :          Rohith V
+/// Project Created :  Feb 3,2023
+/// Partner :          None
+/// 
+///  FormulaTest class is a test suite containing all the tests that exploit the bugs in the
+///  Formula class simultaneously testing out the functionality and its output
+/// </summary>
+/// 
 [TestClass]
 public class UnitTest1
 {
@@ -353,6 +363,4 @@ public class UnitTest1
         Formula f = new("x+6$-(2)");
 
     }
-
-
 }
