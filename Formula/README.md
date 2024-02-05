@@ -27,7 +27,7 @@ None
 
 # References:
 
-None
+Bard : Requested regex for finding if a valid variable is given or not
 
 
 

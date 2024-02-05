@@ -26,27 +26,35 @@ using System.Text.RegularExpressions;
 
 namespace SpreadsheetUtilities
 {
-  /// <summary>
-  /// Represents formulas written in standard infix notation using standard precedence
-  /// rules.  The allowed symbols are non-negative numbers written using double-precision 
-  /// floating-point syntax (without unary preceeding '-' or '+'); 
-  /// variables that consist of a letter or underscore followed by 
-  /// zero or more letters, underscores, or digits; parentheses; and the four operator 
-  /// symbols +, -, *, and /.  
-  /// 
-  /// Spaces are significant only insofar that they delimit tokens.  For example, "xy" is
-  /// a single variable, "x y" consists of two variables "x" and y; "x23" is a single variable; 
-  /// and "x 23" consists of a variable "x" and a number "23".
-  /// 
-  /// Associated with every formula are two delegates:  a normalizer and a validator.  The
-  /// normalizer is used to convert variables into a canonical form, and the validator is used
-  /// to add extra restrictions on the validity of a variable (beyond the standard requirement 
-  /// that it consist of a letter or underscore followed by zero or more letters, underscores,
-  /// or digits.)  Their use is described in detail in the constructor and method comments.
-  /// </summary>
-  public class Formula
+    /// <summary>
+    ///
+    /// Author      : Rohith Veeramachaneni
+    /// Partner     : None
+    /// Date Created: Jan 27,2023
+    ///
+    ///
+    /// 
+    /// Represents formulas written in standard infix notation using standard precedence
+    /// rules.  The allowed symbols are non-negative numbers written using double-precision 
+    /// floating-point syntax (without unary preceeding '-' or '+'); 
+    /// variables that consist of a letter or underscore followed by 
+    /// zero or more letters, underscores, or digits; parentheses; and the four operator 
+    /// symbols +, -, *, and /.  
+    /// 
+    /// Spaces are significant only insofar that they delimit tokens.  For example, "xy" is
+    /// a single variable, "x y" consists of two variables "x" and y; "x23" is a single variable; 
+    /// and "x 23" consists of a variable "x" and a number "23".
+    /// 
+    /// Associated with every formula are two delegates:  a normalizer and a validator.  The
+    /// normalizer is used to convert variables into a canonical form, and the validator is used
+    /// to add extra restrictions on the validity of a variable (beyond the standard requirement 
+    /// that it consist of a letter or underscore followed by zero or more letters, underscores,
+    /// or digits.)  Their use is described in detail in the constructor and method comments.
+    /// </summary>
+    public class Formula
   {
         private string normalisedAndValidatedString;
+        // List to store all normalised tokens
         private List<string> normalisedTokens = new();
         private double finalResult = 0;
 
@@ -87,9 +95,13 @@ namespace SpreadsheetUtilities
     /// </summary>
     public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
     {
+            // splits string to tokens storing them in a list
             List<string> tokens=GetTokens(formula).ToList();
+            // normalises tokens according to given delegate
             normalisedTokens=normalise(normalize, tokens);
+            // validates tokens by rules provided
             Boolean validation=validateTokens(normalisedTokens,isValid);
+            // final string after normalising and validating
             normalisedAndValidatedString = string.Join("",normalisedTokens);
     }
 
@@ -251,12 +263,10 @@ namespace SpreadsheetUtilities
                                         valueStack.Push(value2 - value1);
                                 }
 
-                        //// Step 2 if "(" is at top of operator stack, pops it
+                        // Step 2 if "(" is at top of operator stack, pops it
                         if (operatorStack != null && operatorStack.Count != 0
                             && operatorStack.Peek().Equals("("))
                             operatorStack.Pop();
-                        //else
-                        //    throw new ArgumentException(" ')' operator not found ");
 
                         /// Step 3
                         /// If top of the operatorStack is either  "*" or "/"
@@ -314,6 +324,8 @@ namespace SpreadsheetUtilities
                     }
                 }
                 }
+            // catches if any argument exceptions are thrown and an appropriate FormatException
+            // with the proper reason is thrown
             catch(ArgumentException e)
             {
                 if (e.Message.Equals("Divide by Zero error"))
@@ -338,8 +350,11 @@ namespace SpreadsheetUtilities
     public IEnumerable<String> GetVariables()
     {
       List<string> normalisedVariableTokens = new();
+            // iterate through each token in normalisedToken list
       foreach(string token in normalisedTokens)
             {
+                // if any operator or signs are found ignore them and if any variables
+                // are found, add them to the normalisedVariableTokens list
                 if (token.Equals("+") || token.Equals("-") || token.Equals("*")
                 || token.Equals("/") || token.Equals("(") || token.Equals(")")
                 || Double.TryParse(token, out double castValue))
@@ -361,6 +376,7 @@ namespace SpreadsheetUtilities
     /// </summary>
     public override string ToString()
     {
+       // Trims down the whiteSpaced for a given string
       string trimmedFormula = normalisedAndValidatedString.Trim();
       return trimmedFormula;
     }
@@ -392,11 +408,14 @@ namespace SpreadsheetUtilities
        bool equalityCheck = true;
        if (obj == null || !(obj is Formula))
                 return false;
+       // casts the given object into Formula if it's a Formula object
        Formula castedFormula = (Formula)obj;
+            // checks if both formulas are having same number of tokens
             if (castedFormula.normalisedTokens.Count() == this.normalisedTokens.Count())
             {
                 for (int i = 0; i < normalisedTokens.Count(); i++)
                 {
+                    // checks if both formulas are variable at the index i
                     if (validateIsVariable(castedFormula.normalisedTokens[i]) && validateIsVariable(normalisedTokens[i]))
                     {
                         if (castedFormula.normalisedTokens[i].Equals(normalisedTokens[i]))
@@ -404,6 +423,7 @@ namespace SpreadsheetUtilities
                         equalityCheck = false;
                         return equalityCheck;
                     }
+                    // checks if both formulas are having an operator at the index i
                      else if (!(Double.TryParse(castedFormula.normalisedTokens[i],out double value1)
                         && Double.TryParse(normalisedTokens[i], out double value2))
                        || (validateIsVariable(castedFormula.normalisedTokens[i]) && validateIsVariable(normalisedTokens[i])))
@@ -413,7 +433,8 @@ namespace SpreadsheetUtilities
                         equalityCheck = false;
                          return equalityCheck;
                     }
-                    else 
+                    // checks if both formulas are having a double value at the index i
+                    else
                     {
                         if (Double.TryParse(castedFormula.normalisedTokens[i], out value1)
                          && Double.TryParse(normalisedTokens[i], out value2))
@@ -438,7 +459,8 @@ namespace SpreadsheetUtilities
     /// 
     /// </summary>
     public static bool operator ==(Formula f1, Formula f2)
-    { 
+    {
+       // If f1 and f2 are equal using Equals method, then returns true
        if (f1.Equals(f2))
             return true;
       return false;
@@ -451,6 +473,7 @@ namespace SpreadsheetUtilities
     /// </summary>
     public static bool operator !=(Formula f1, Formula f2)
     {
+        // Checks by negating result of '==' overloaded operator
         if (!(f1 == f2))
             return true;
         return false;
@@ -546,6 +569,7 @@ namespace SpreadsheetUtilities
                     || tokensToBeValidated[i].Equals("*") || tokensToBeValidated[i].Equals("/")
                     || tokensToBeValidated[i].Equals("("))
                 {
+                    // checks if i+1 is Out of Index and throws exception if so
                     if (i + 1 > tokensToBeValidated.Count())
                         throw new FormatException(" No further tokens found !");
                     if (!checkTokenForFollowingOperator(tokensToBeValidated, i + 1))
@@ -566,35 +590,62 @@ namespace SpreadsheetUtilities
             return true;
         }
 
+    /// <summary>
+    ///  Normalises all tokens in string according to the delegate given and
+    ///  returns them as a list
+    /// </summary>
+    /// <param name="normalize"></param> Delegate that instructs how to normalise string
+    /// <param name="tokenEnumerator"></param> List containing all tokens in the given string
+    /// <returns></returns>
     private List<string> normalise(Func<string,string>normalize,IEnumerable<string> tokenEnumerator)
         {
            foreach(string token in tokenEnumerator)
             {
+                // if token is an operator, ignores it 
                 if (token.Equals("+") || token.Equals("-") || token.Equals("*")
                    || token.Equals("/") || token.Equals(""))
                 {
                     normalisedTokens.Add(token);
                     continue;
                 }
+                // if token is a variable, then normalises it using delegate 
                 normalisedTokens.Add(normalize(token));
             }
             return normalisedTokens;
         }
-
+    /// <summary>
+    ///  Validates if the given token is a variable by checking it against all the
+    ///  requirements needed to be a variable
+    /// </summary>
+    /// <param name="variableToBeChecked"></param> Token which is to be validated if a variable
+    /// <returns></returns> true if a variable or false otherwise
     private Boolean validateIsVariable(string variableToBeChecked)
         {
             return Regex.IsMatch(variableToBeChecked, @"^[a-zA-Z_][a-zA-Z0-9_]*$");
         }
-
+    /// <summary>
+    /// Checks the next token if a valid operator or token is given,if not returns false
+    /// </summary>
+    /// <param name="tokensToBeValidated"></param>List containing all tokens in a string
+    /// <param name="followingTokenIndex"></param>index at which operator or token is to be validated
+    /// <returns></returns> true if following the rules stated otherwise false
     private Boolean checkTokenForFollowingOperator(List<string> tokensToBeValidated,int followingTokenIndex)
         {
+            // If following token is not opening bracket or a variable or a double number returns false
             if (!(tokensToBeValidated[followingTokenIndex].Equals("(")
                 || validateIsVariable(tokensToBeValidated[followingTokenIndex])
                 || Double.TryParse(tokensToBeValidated[followingTokenIndex], out double castedValue)))
                 return false;
             return true;
         }
-    private Boolean checkTokenForExtraRule(List<string> tokensToBeValidated, int followingTokenIndex)
+        /// <summary>
+        /// Checks the following token if the current token is an opening brace or double value or a variable
+        /// 
+        /// </summary>
+        /// <param name="tokensToBeValidated"></param> List containing all tokens in a string
+        /// <param name="followingTokenIndex"></param> index at which operator or token is to be validated
+        /// <returns></returns> true if following the rules stated otherwise false
+        private Boolean checkTokenForExtraRule(List<string> tokensToBeValidated, int followingTokenIndex)
         {
             // If current tokens are closing parenthesis or a Number or a variable
             if (tokensToBeValidated[followingTokenIndex - 1].Equals(")")
@@ -613,6 +664,11 @@ namespace SpreadsheetUtilities
             return false;
         }
 
+        /// <summary>
+        ///  Checks if the token is a valid operator or symbol
+        /// </summary>
+        /// <param name="token"></param> Token to be validated
+        /// <returns></returns> true if token is any of the specified operators or symbols otherwise false
         private Boolean checkIfAnyValidToken(string token)
         {
             if (token.Equals("(") || token.Equals(")")
