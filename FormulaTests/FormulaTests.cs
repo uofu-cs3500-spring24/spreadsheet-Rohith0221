@@ -363,4 +363,17 @@ public class UnitTest1
         Formula f = new("x+6$-(2)");
 
     }
+
+    [TestMethod]
+    public void addingTwoDoubles()
+    {
+        Formula f = new("2.011+3.11");
+        Assert.AreEqual(5.121,f.Evaluate(null));
+    }
+    [TestMethod]
+    public void addingTwoNegativeDoubles()
+    {
+        Formula f = new("2.011*x1");
+        Assert.AreEqual(Math.Pow(2.011,2), f.Evaluate(x1=>2.011));
+    }
 }
