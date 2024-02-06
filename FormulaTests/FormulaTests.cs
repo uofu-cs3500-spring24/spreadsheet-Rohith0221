@@ -371,7 +371,7 @@ public class UnitTest1
         Assert.AreEqual(5.121,f.Evaluate(null));
     }
     [TestMethod]
-    public void addingTwoNegativeDoubles()
+    public void multiplyingTwoDoubles()
     {
         Formula f = new("2.011*x1");
         Assert.AreEqual(Math.Pow(2.011,2), f.Evaluate(x1=>2.011));
