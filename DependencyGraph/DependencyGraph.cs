@@ -51,7 +51,8 @@ namespace SpreadsheetUtilities
     /// </summary>
     public class DependencyGraph
     {
-        private Dictionary<string, HashSet<string>> nodesGraph;
+        private Dictionary<string, HashSet<string>> nodesGraphDependents;
+        private Dictionary<string, HashSet<string>> nodesGraphDependees;
 
 
         /// <summary>
@@ -59,7 +60,8 @@ namespace SpreadsheetUtilities
         /// </summary>
         public DependencyGraph()
         {
-            nodesGraph = new();
+            nodesGraphDependents = new();
+            nodesGraphDependees = new();
         }
 
 
@@ -73,11 +75,11 @@ namespace SpreadsheetUtilities
             {
                 int totalOrderedPairsCount = 0;
                 // gets all the keys in the dictionary
-                foreach (string key in nodesGraph.Keys)
+                foreach (string key in nodesGraphDependents.Keys)
                 {
                     // gets all the dependents for the string key and adds their count to
                     // get total number of pairs that exist in the dictionary
-                    totalOrderedPairsCount += nodesGraph[key].Count();
+                    totalOrderedPairsCount += nodesGraphDependents[key].Count();
                 }
                 return totalOrderedPairsCount;
             }
@@ -103,9 +105,9 @@ namespace SpreadsheetUtilities
         public bool HasDependents(string s)
         {
             // checks if the given string s exists as a key in the dictionary
-            if (nodesGraph.ContainsKey(s))
+            if (nodesGraphDependents.ContainsKey(s))
             {
-                if (nodesGraph[s].Count != 0)
+                if (nodesGraphDependents[s].Count != 0)
                     return true;
                 return false;
             }
@@ -127,8 +129,8 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            if(nodesGraph.ContainsKey(s))
-                return nodesGraph[s];
+            if(nodesGraphDependents.ContainsKey(s))
+                return nodesGraphDependents[s];
             return new HashSet<string>();
         }
 
@@ -151,19 +153,30 @@ namespace SpreadsheetUtilities
         public void AddDependency(string s, string t)
         {
             // checks if string s is already existent in dictionary
-            if (!nodesGraph.ContainsKey(s))
+            if (!nodesGraphDependents.ContainsKey(s))
             {
-                nodesGraph.Add(s, new HashSet<string>());
-                nodesGraph[s].Add(t);
+                nodesGraphDependents.Add(s, new HashSet<string>());
+                nodesGraphDependents[s].Add(t);
                 // adds another empty dependency connection for string t given 
-                if (!nodesGraph.ContainsKey(t))
-                    nodesGraph.Add(t, new HashSet<string>());
+                if (!nodesGraphDependees.ContainsKey(t))
+                {
+                    nodesGraphDependees.Add(t, new HashSet<string>());
+                    nodesGraphDependees[t].Add(s);
+                }
+                else
+                    nodesGraphDependees[t].Add(s);
             }
             else
             {
-                nodesGraph[s].Add(t);
-                if (!nodesGraph.ContainsKey(t))
-                    nodesGraph.Add(t, new HashSet<string>());
+                nodesGraphDependents[s].Add(t);
+                if (!nodesGraphDependees.ContainsKey(t))
+                {
+                    nodesGraphDependees.Add(t, new HashSet<string>());
+                    nodesGraphDependees[t].Add(s);
+                }
+                else
+                    nodesGraphDependees[t].Add(s);
+
             }
         }
 
@@ -177,9 +190,11 @@ namespace SpreadsheetUtilities
         {
             // checks if both given string s and t are existent in dictionary before trying
             // to delete them
-            if (nodesGraph.ContainsKey(s) && nodesGraph[s].Contains(t))
+            if (nodesGraphDependents.ContainsKey(s) && nodesGraphDependents[s].Contains(t))
             {
-                nodesGraph[s].Remove(t);
+                nodesGraphDependents[s].Remove(t);
+                if(nodesGraphDependees.ContainsKey(t) && nodesGraphDependees[t].Contains(s))
+                    nodesGraphDependees[t].Remove(s);
             }
         }
 
@@ -190,12 +205,12 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
-            if (nodesGraph.ContainsKey(s))
+            if (nodesGraphDependents.ContainsKey(s))
             {
                 // resests the dependents of key string s if any exists
-                if (nodesGraph[s].Count() != 0)
+                if (nodesGraphDependents[s].Count() != 0)
                 {
-                    nodesGraph[s] = new HashSet<string>();
+                    nodesGraphDependents[s] = new HashSet<string>();
                 }
                 // checks if needed to iterate through given IEnumerable and adds them to the
                 // string key s into the dictionary
@@ -223,7 +238,7 @@ namespace SpreadsheetUtilities
 
                 }
                 else if (newDependents.Count()==0)
-                    nodesGraph.Add(s,new HashSet<string>());
+                    nodesGraphDependents.Add(s,new HashSet<string>());
             }
         }
 
@@ -237,20 +252,20 @@ namespace SpreadsheetUtilities
                 // removes all the dependee connection for the given dependee string s
                 foreach (string dependee in getDependeeList(s))
                 {
-                    nodesGraph[dependee].Remove(s);
+                    nodesGraphDependents[dependee].Remove(s);
                 }
 
                 foreach (string newDependee in newDependees)
                 {
                     // if a key string s already exists, it adds dependee to that key
-                    if (nodesGraph.ContainsKey(newDependee))
-                        nodesGraph[newDependee].Add(s);
+                    if (nodesGraphDependents.ContainsKey(newDependee))
+                        nodesGraphDependents[newDependee].Add(s);
                     else
                     {
                         // creates a new key entry in the dictionary if doesn't exist and adds
                         // dependee to this key string s
-                        nodesGraph.Add(newDependee, new HashSet<string>());
-                        nodesGraph[newDependee].Add(s);
+                        nodesGraphDependents.Add(newDependee, new HashSet<string>());
+                        nodesGraphDependents[newDependee].Add(s);
                     }
                 }
         }
@@ -263,17 +278,20 @@ namespace SpreadsheetUtilities
         /// <returns></returns> List of all the dependents of the given dependee
         private IEnumerable<string> getDependeeList(string s)
         {
-            List<string> dependeeList = new List<string>();
-            // gets all keys in the dictionary
-                List<string> keyLists = new(nodesGraph.Keys);
-                foreach (string eachKey in keyLists)
-                {
-                // for each key checks if string s is a dependent and if so,
-                // then key is considered as a dependee and added in dependeeList
-                    if (nodesGraph[eachKey].Contains(s))
-                        dependeeList.Add(eachKey);
-                }
-            return dependeeList;
+            if (nodesGraphDependees.ContainsKey(s))
+                return nodesGraphDependees[s];
+            //    List<string> dependeeList = new List<string>();
+            //    // gets all keys in the dictionary
+            //        List<string> keyLists = new(nodesGraphDependents.Keys);
+            //        foreach (string eachKey in keyLists)
+            //        {
+            //        // for each key checks if string s is a dependent and if so,
+            //        // then key is considered as a dependee and added in dependeeList
+            //            if (nodesGraphDependents[eachKey].Contains(s))
+            //                dependeeList.Add(eachKey);
+            //        }
+            //    return dependeeList;
+            return new HashSet<string>();
         }
 
 

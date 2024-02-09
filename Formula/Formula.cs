@@ -58,6 +58,7 @@ namespace SpreadsheetUtilities
         private List<string> normalisedTokens = new();
         private double finalResult = 0;
 
+        /// <summary>
         /// Creates a Formula from a string that consists of an infix expression written as
         /// described in the class comment.  If the expression is syntactically invalid,
         /// throws a FormulaFormatException with an explanatory Message.
