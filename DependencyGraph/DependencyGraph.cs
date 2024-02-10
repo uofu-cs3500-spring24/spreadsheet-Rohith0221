@@ -193,8 +193,14 @@ namespace SpreadsheetUtilities
             if (nodesGraphDependents.ContainsKey(s) && nodesGraphDependents[s].Contains(t))
             {
                 nodesGraphDependents[s].Remove(t);
-                if(nodesGraphDependees.ContainsKey(t) && nodesGraphDependees[t].Contains(s))
+                if (nodesGraphDependents[s].Count() == 0)
+                    nodesGraphDependents.Remove(s);
+                if (nodesGraphDependees.ContainsKey(t) && nodesGraphDependees[t].Contains(s))
+                {
                     nodesGraphDependees[t].Remove(s);
+                    if (nodesGraphDependees[t].Count() == 0)
+                        nodesGraphDependees.Remove(t);
+                }
             }
         }
 
