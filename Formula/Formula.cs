@@ -560,7 +560,7 @@ namespace SpreadsheetUtilities
             {
                 int startTokenIndex = 0;
                 // Error from isValid delegate with given token
-                if (!isValid(tokensToBeValidated[i]))
+                if (validateIsVariable(tokensToBeValidated[i]) &&!isValid(tokensToBeValidated[i]))
                     throw new FormulaFormatException($" isValid delegate found an error with {tokensToBeValidated[i]} ");
                 if (tokensToBeValidated[i].Equals("("))
                     opening_bracesCount += 1;
