@@ -210,6 +210,8 @@ namespace SpreadsheetUtilities
                 // resests the dependents of key string s if any exists
                 if (nodesGraphDependents[s].Count() != 0)
                 {
+                    foreach (string dependent in GetDependents(s))
+                        RemoveDependency(s, dependent);
                     nodesGraphDependents[s] = new HashSet<string>();
                 }
                 // checks if needed to iterate through given IEnumerable and adds them to the
@@ -231,12 +233,6 @@ namespace SpreadsheetUtilities
                     foreach (string newDependent in newDependents)
                         AddDependency(s, newDependent);
                 }
-                else if (newDependents.Count() != 0)
-                {
-                    foreach (string newDependent in newDependents)
-                        AddDependency(s, newDependent);
-
-                }
                 else if (newDependents.Count()==0)
                     nodesGraphDependents.Add(s,new HashSet<string>());
             }
@@ -249,24 +245,25 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
-                // removes all the dependee connection for the given dependee string s
-                foreach (string dependee in getDependeeList(s))
-                {
-                    nodesGraphDependents[dependee].Remove(s);
-                }
-
+            // removes all the dependee connection for the given dependee string s
+            //nodesGraphDependees[s] = new HashSet<string>();
+            foreach(string dependee in GetDependees(s))
+            {
+                RemoveDependency(dependee, s);
+            }
                 foreach (string newDependee in newDependees)
                 {
-                    // if a key string s already exists, it adds dependee to that key
-                    if (nodesGraphDependents.ContainsKey(newDependee))
-                        nodesGraphDependents[newDependee].Add(s);
-                    else
-                    {
-                        // creates a new key entry in the dictionary if doesn't exist and adds
-                        // dependee to this key string s
-                        nodesGraphDependents.Add(newDependee, new HashSet<string>());
-                        nodesGraphDependents[newDependee].Add(s);
-                    }
+                AddDependency(newDependee, s);
+                    //// if a key string s already exists, it adds dependee to that key
+                    //if (nodesGraphDependents.ContainsKey(newDependee))
+                    //    nodesGraphDependents[newDependee].Add(s);
+                    //else
+                    //{
+                    //    // creates a new key entry in the dictionary if doesn't exist and adds
+                    //    // dependee to this key string s
+                    //    nodesGraphDependents.Add(newDependee, new HashSet<string>());
+                    //    nodesGraphDependents[newDependee].Add(s);
+                    //}
                 }
         }
 
