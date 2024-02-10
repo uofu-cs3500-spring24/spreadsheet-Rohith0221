@@ -487,8 +487,17 @@ namespace SpreadsheetUtilities
         /// </summary>
         public override int GetHashCode()
         {
+            if (this.finalResult == 0)
+            {
+                if (GetVariables().Count() != 0)
+                    return normalisedTokens.Count() * GetVariables().Count();
+                else
+                    return normalisedTokens.Count() + this.normalisedAndValidatedString.Length;
+            }
 
-            return (int)this.finalResult * normalisedTokens.Count() + normalisedAndValidatedString.GetHashCode();
+            else if(GetVariables().Count()!=0)
+                return (int)this.finalResult * normalisedTokens.Count()*GetVariables().Count();
+            return (int)this.finalResult * normalisedTokens.Count() + this.normalisedAndValidatedString.Length;
         }
 
         /// <summary>
