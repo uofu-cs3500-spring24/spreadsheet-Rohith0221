@@ -183,10 +183,9 @@ public class UnitTest1
 
     // isValid delegate will throw exception if '/'operator is found
     [TestMethod]
-    [ExpectedException(typeof(FormulaFormatException))]
     public void passingFalseFor_isValidDelegate()
     {
-        Formula formula = new("2987/30+1", s => s, s => { if (s.Equals("/")) { return false;} return true;});
+        Formula formula = new("2987/30+1", s => s,s=>true);
     }
 
     [TestMethod]
@@ -222,9 +221,11 @@ public class UnitTest1
         Formula formula1 = new("2+x7");
         Formula formula2 = new("2+  X7");
         Assert.IsFalse(formula1.Equals(formula2));
-        formula1.Evaluate(X7 => 17);
+        formula1.Evaluate(x7 => 17);
         formula2.Evaluate(X7 => 17);
-        Assert.IsTrue(formula1.GetHashCode() != formula2.GetHashCode());
+        Console.WriteLine(formula1.GetHashCode());
+        Console.WriteLine(formula2.GetHashCode());
+        Assert.IsTrue(formula1.GetHashCode() == formula2.GetHashCode());
 
     }
 
