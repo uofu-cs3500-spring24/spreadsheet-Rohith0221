@@ -15,7 +15,7 @@ using SpreadsheetUtilities;
 public class UnitTest1
 {
     [TestMethod]
-    [ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void InvalidEndingOperator()
     {
         Formula formula = new("x+");
@@ -70,34 +70,34 @@ public class UnitTest1
     public void testDivisionByZero()
     {
         Formula formula = new Formula("2.0/0.0");
-        Assert.AreEqual(new FormulaError(" Cannot evaluate as division by zero is not possible!").Reason,
+        Assert.AreEqual(new FormulaError(" Cannot evaluate as division by zero is not possible!"),
                          formula.Evaluate(null));
     }
 
     // Rule 5 Test:Starting operator rule and Unary errors check with all 4 operators
     [TestMethod]
-    [ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void testUnaryError1()
     {
         Formula formula = new("+9");
     }
 
     [TestMethod]
-    [ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void testUnaryError2()
     {
         Formula formula = new("-9");
     }
 
     [TestMethod]
-    [ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void testUnaryError3()
     {
         Formula formula = new("*9");
     }
 
     [TestMethod]
-    [ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void testUnaryError4()
     {
         Formula formula = new("/9");
@@ -106,7 +106,7 @@ public class UnitTest1
     // Rule 7 error with invalid closing parenthesis after + operator
 
     [TestMethod]
-    [ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void testFormulaWithMoreClosingBrackets()
     {
         Formula formula = new("2*(3+)5)");
@@ -114,7 +114,7 @@ public class UnitTest1
 
     // Rule 4 error with more open brackets
     [TestMethod]
-    [ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void testFormulaWithMoreOpenBrackets()
     {
         Formula formula = new("(2*(3+5)");
@@ -122,7 +122,7 @@ public class UnitTest1
 
     // Rule 3 right parenthesis rule
     [TestMethod]
-    [ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void IncorrectFormula()
     {
         Formula formula = new("(2)+3)");
@@ -131,7 +131,7 @@ public class UnitTest1
 
     // Rule 2 Empty Formula with no tokens
     [TestMethod]
-    [ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void emptyFormula()
     {
         Formula formula = new("");
@@ -139,7 +139,7 @@ public class UnitTest1
 
     // Rule 6 Ending token rule test
     [TestMethod]
-    [ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void invalidOperator()
     {
         Formula formula = new("x6$");
@@ -149,26 +149,26 @@ public class UnitTest1
     public void delegateLookupError()
     {
         Formula formula = new("2+x7");
-        Assert.AreEqual(new FormulaError(" Delegate cannot find any value for the variable found").Reason,
+        Assert.AreEqual(new FormulaError(" Delegate cannot find any value for the variable found"),
                          formula.Evaluate(null));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void formulaFormatError_ExtraFollowingRule_FollowingNumber()
     {
         Formula formula = new("2$");
     }
 
     [TestMethod]
-    [ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void formulaFormatError_ExtraFollowingRule_FollowingVariable()
     {
         Formula formula = new("x7%");
     }
 
     [TestMethod]
-    [ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void formulaFormatError_ExtraFollowingRule_FollowingClosingBracket()
     {
         Formula formula = new("(x7)%");
@@ -183,7 +183,7 @@ public class UnitTest1
 
     // isValid delegate will throw exception if '/'operator is found
     [TestMethod]
-    [ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void passingFalseFor_isValidDelegate()
     {
         Formula formula = new("2987/30+1", s => s, s => { if (s.Equals("/")) { return false;} return true;});
@@ -246,7 +246,7 @@ public class UnitTest1
     public void divideByZeroValueVariable()
     {
         Formula formula = new("2/x1");
-        Assert.AreEqual(new FormulaError(" Cannot evaluate as division by zero is not possible!").Reason,formula.Evaluate(x1 => 0));
+        Assert.AreEqual(new FormulaError(" Cannot evaluate as division by zero is not possible!"),formula.Evaluate(x1 => 0));
     }
 
     [TestMethod]
@@ -288,7 +288,7 @@ public class UnitTest1
     }
 
     [TestMethod]
-    [ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void syntaxError()
     {
         Formula f = new("A 1");
@@ -299,7 +299,7 @@ public class UnitTest1
     public void evaluationError()
     {
         Formula f = new("1/(A1-A1)");
-        Assert.AreEqual(new FormulaError(" Cannot evaluate as division by zero is not possible!").Reason, f.Evaluate(A1 => 1));
+        Assert.AreEqual(new FormulaError(" Cannot evaluate as division by zero is not possible!"), f.Evaluate(A1 => 1));
     }
 
     [TestMethod]
@@ -357,7 +357,7 @@ public class UnitTest1
     }
 
     [TestMethod]
-    [ExpectedException(typeof(FormatException))]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void invalidToken()
     {
         Formula f = new("x+6$-(2)");
