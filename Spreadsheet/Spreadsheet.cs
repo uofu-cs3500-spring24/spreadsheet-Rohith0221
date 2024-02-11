@@ -40,9 +40,12 @@ namespace SS
         /// <returns></returns>
         public override IEnumerable<string> GetNamesOfAllNonemptyCells()
         {
-            if(nonEmptyCells.Count!=0)
-                return nonEmptyCells.Keys;
-            return new HashSet<string>();
+            HashSet<string> nonEmptyCellNames = new();
+            if (nonEmptyCells.Count != 0)
+                foreach (string cellName in nonEmptyCells.Keys)
+                    if (!nonEmptyCells[cellName].getCellContent().Equals(""))
+                        nonEmptyCellNames.Add(cellName);
+            return nonEmptyCellNames;
         }
 
         /// <summary>
@@ -119,7 +122,7 @@ namespace SS
                 throw new InvalidNameException();
 
             foreach (string dependent in formula.GetVariables())
-                cellDependency.AddDependency(name, dependent);
+                cellDependency.AddDependency(dependent, name);
             HashSet<string> dependents = this.GetDirectDependents(name).ToHashSet();
             dependents.Add(name);
 

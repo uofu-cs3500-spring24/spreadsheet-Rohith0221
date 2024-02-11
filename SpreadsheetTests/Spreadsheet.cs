@@ -96,5 +96,29 @@ public class UnitTest1
         Assert.AreEqual(1, spreadsheet.GetNamesOfAllNonemptyCells().Count());
     }
 
+    [TestMethod]
+    public void getNonEmptyCellNames()
+    {
+        Spreadsheet spreadsheet = new();
+        spreadsheet.SetCellContents("A1", 20);
+        spreadsheet.SetCellContents("A2", "A2+20");
+        spreadsheet.SetCellContents("A3", "A2-A1+8");
+        spreadsheet.SetCellContents("A4", "");
+
+        List<string> output = spreadsheet.GetNamesOfAllNonemptyCells().ToList();
+        Assert.AreEqual(3, spreadsheet.GetNamesOfAllNonemptyCells().Count());
+
+        List<string> list = new();
+        list.Add("A1");
+        list.Add("A2");
+        list.Add("A3");
+
+        for(int i=0;i<output.Count();i++)
+        {
+
+            Assert.AreEqual(list[i].ToString(), output[i].ToString());
+        }
+    }
+
 
 }
