@@ -23,8 +23,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FormulaTests", "FormulaTest
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spreadsheet", "Spreadsheet\Spreadsheet.csproj", "{B7C87B53-A376-44D2-9466-6B67C9E3E918}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CellTester", "CellTester\CellTester.csproj", "{C5C7CEA6-33EB-4E99-8B88-788EEFD75BBF}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpreadsheetTests", "SpreadsheetTests\SpreadsheetTests.csproj", "{65210E76-4A37-42DC-A608-9A5DB6B2861A}"
 EndProject
 Global
@@ -61,10 +59,6 @@ Global
 		{B7C87B53-A376-44D2-9466-6B67C9E3E918}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7C87B53-A376-44D2-9466-6B67C9E3E918}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7C87B53-A376-44D2-9466-6B67C9E3E918}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C5C7CEA6-33EB-4E99-8B88-788EEFD75BBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C5C7CEA6-33EB-4E99-8B88-788EEFD75BBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C5C7CEA6-33EB-4E99-8B88-788EEFD75BBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C5C7CEA6-33EB-4E99-8B88-788EEFD75BBF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{65210E76-4A37-42DC-A608-9A5DB6B2861A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{65210E76-4A37-42DC-A608-9A5DB6B2861A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{65210E76-4A37-42DC-A608-9A5DB6B2861A}.Release|Any CPU.ActiveCfg = Release|Any CPU
