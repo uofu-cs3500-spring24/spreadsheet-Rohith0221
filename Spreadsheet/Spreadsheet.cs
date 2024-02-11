@@ -18,6 +18,12 @@ namespace SS
             nonEmptyCells = new();
 		}
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidNameException"></exception>
         public override object GetCellContents(string name)
         {
             if (name == null || !validateCellName(name))
@@ -28,6 +34,10 @@ namespace SS
             return null;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public override IEnumerable<string> GetNamesOfAllNonemptyCells()
         {
             if(nonEmptyCells.Count!=0)
@@ -35,18 +45,41 @@ namespace SS
             return new HashSet<string>();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidNameException"></exception>
         public override ISet<string> SetCellContents(string name, double number)
         {
             if (name == null || !validateCellName(name))
                 throw new InvalidNameException();
+
+            cellDependency.AddDependency(name, "");
             HashSet<string> dependents = this.GetDirectDependents(name).ToHashSet();
             dependents.Add(name);
-            Cell cell = new(name,number);
-            nonEmptyCells.Add(name, cell);
-            cellDependency.AddDependency(name, "");
+            if (nonEmptyCells.ContainsKey(name))
+            {
+                nonEmptyCells[name].setCellContent(number);
+            }
+            else
+            {
+                Cell cell = new(name, number);
+                nonEmptyCells.Add(name, cell);
+            }
             return dependents;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidNameException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
         public override ISet<string> SetCellContents(string name, string text)
         {
             if (name == null || !validateCellName(name))
@@ -54,14 +87,30 @@ namespace SS
             else if (text == null)
                 throw new ArgumentNullException();
 
+            cellDependency.AddDependency(name, "");
+
             HashSet<string> dependents = this.GetDirectDependents(name).ToHashSet();
             dependents.Add(name);
-            Cell cell = new(name, text);
-            nonEmptyCells.Add(name, cell);
-            cellDependency.AddDependency(name, "");
-            return dependents; 
+            if (nonEmptyCells.ContainsKey(name))
+            {
+                nonEmptyCells[name].setCellContent(text);
+            }
+            else
+            {
+                Cell cell = new(name, text);
+                nonEmptyCells.Add(name, cell);
+            }
+            return dependents;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="formula"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="InvalidNameException"></exception>
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
             if (formula == null)
@@ -69,16 +118,29 @@ namespace SS
             else if (name == null || !validateCellName(name))
                 throw new InvalidNameException();
 
-
-            Cell cell = new(name, formula);
-            nonEmptyCells.Add(name, cell);
-            foreach(string dependent in formula.GetVariables())
-                cellDependency.AddDependency(name,dependent);
+            foreach (string dependent in formula.GetVariables())
+                cellDependency.AddDependency(name, dependent);
             HashSet<string> dependents = this.GetDirectDependents(name).ToHashSet();
             dependents.Add(name);
+
+            if (nonEmptyCells.ContainsKey(name))
+            {
+                nonEmptyCells[name].setCellContent(formula);
+            }
+            else
+            {
+                Cell cell = new(name, formula);
+                nonEmptyCells.Add(name, cell);
+            }
             return dependents;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidNameException"></exception>
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
             if (name == null || !validateCellName(name))
@@ -86,6 +148,11 @@ namespace SS
             return cellDependency.GetDependents(name);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cellName"></param>
+        /// <returns></returns>
         private bool validateCellName(string cellName)
         {
             return Regex.IsMatch(cellName, @"^[a-zA-Z_][a-zA-Z0-9_]*$");

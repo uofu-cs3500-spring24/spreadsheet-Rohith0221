@@ -82,7 +82,13 @@ namespace SS
 			//else if(cellContent)
 			return cellValue;
 		}
+
+		public Object getValue()
+		{
+			return this.cellValue;
+		}
 	}
+
 	public class CellNameFormatException : FormatException
     {
         private String Reason;

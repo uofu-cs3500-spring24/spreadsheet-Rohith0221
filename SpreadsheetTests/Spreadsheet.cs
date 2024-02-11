@@ -22,5 +22,79 @@ public class UnitTest1
         spreadsheet.GetCellContents(" ");
     }
 
+    [TestMethod]
+    public void test_CellConstructor1()
+    {
+        Spreadsheet spreadsheet = new();
+        spreadsheet.SetCellContents("X", 2.0);
+    }
+
+    [TestMethod]
+    public void testConstructor2()
+    {
+        Spreadsheet spreadsheet = new();
+        spreadsheet.SetCellContents("X", "Value_X");
+    }
+
+    [TestMethod]
+    public void testConstructor3()
+    {
+        Spreadsheet spreadsheet = new();
+        spreadsheet.SetCellContents("X",new Formula("20+X3"));
+    }
+
+    [TestMethod]
+    public void getCellContents()
+    {
+        Spreadsheet spreadsheet = new();
+        spreadsheet.SetCellContents("X1", 20.0);
+
+        Assert.AreEqual(20.0, spreadsheet.GetCellContents("X1"));
+    }
+
+    [TestMethod]
+    public void testingByCreating_AbstractSpreadSheetObject()
+    {
+        AbstractSpreadsheet abstractSpreadsheet = new Spreadsheet() ;
+        abstractSpreadsheet.SetCellContents("A12", 2);
+        Assert.AreEqual(2.0,abstractSpreadsheet.GetCellContents("A12"));
+    }
+
+    [TestMethod]
+    public void overridingCellContent_Double()
+    {
+        Spreadsheet spreadsheet = new();
+        spreadsheet.SetCellContents("X1", 30);
+        Assert.AreEqual(30.0, spreadsheet.GetCellContents("X1"));
+        spreadsheet.SetCellContents("X1", 20);
+        Assert.AreEqual(20.0, spreadsheet.GetCellContents("X1"));
+
+        Assert.AreEqual(1, spreadsheet.GetNamesOfAllNonemptyCells().Count());
+    }
+
+    [TestMethod]
+    public void overridingCellContent_String()
+    {
+        Spreadsheet spreadsheet = new();
+        spreadsheet.SetCellContents("X1", "Original");
+        Assert.AreEqual("Original", spreadsheet.GetCellContents("X1"));
+        spreadsheet.SetCellContents("X1", "Overriden value");
+        Assert.AreEqual("Overriden value", spreadsheet.GetCellContents("X1"));
+
+        Assert.AreEqual(1, spreadsheet.GetNamesOfAllNonemptyCells().Count());
+    }
+
+    [TestMethod]
+    public void overridingCellContent_Formula()
+    {
+        Spreadsheet spreadsheet = new();
+        spreadsheet.SetCellContents("X1",new Formula("X2"));
+        Assert.AreEqual(new Formula("X2"), spreadsheet.GetCellContents("X1"));
+        spreadsheet.SetCellContents("X1", new Formula("x2"));
+        Assert.AreEqual(new Formula("x2"), spreadsheet.GetCellContents("X1"));
+        
+        Assert.AreEqual(1, spreadsheet.GetNamesOfAllNonemptyCells().Count());
+    }
+
 
 }
