@@ -223,4 +223,29 @@ public class UnitTest1
         Assert.AreEqual("", spreadsheet.GetCellContents("A1"));
     }
 
+
+    [TestMethod()]
+    public void hugeData_StressTest()
+    {
+        Spreadsheet s = new Spreadsheet();
+        s.SetCellContents("A1", new Formula("B1+B2"));
+        s.SetCellContents("B1", new Formula("C1-C2"));
+        s.SetCellContents("B2", new Formula("C3*C4"));
+        s.SetCellContents("C1", new Formula("D1*D2"));
+        s.SetCellContents("C2", new Formula("D3*D4"));
+        s.SetCellContents("C3", new Formula("D5*D6"));
+        s.SetCellContents("C4", new Formula("D7*D8"));
+        s.SetCellContents("D1", new Formula("E10"));
+        s.SetCellContents("D2", new Formula("E10"));
+        s.SetCellContents("D3", new Formula("E10"));
+        s.SetCellContents("D4", new Formula("E10"));
+        s.SetCellContents("D5", new Formula("E10"));
+        s.SetCellContents("D6", new Formula("E10"));
+        s.SetCellContents("D7", new Formula("E10"));
+        s.SetCellContents("D8", new Formula("E10"));
+        ISet<String> cells = s.SetCellContents("E10", 0);
+        Assert.IsTrue(new HashSet<string>() { "A1", "B1", "B2", "C1", "C2", "C3", "C4", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "E10" }.SetEquals(cells));
+    }
+
+
 }
