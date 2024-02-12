@@ -29,7 +29,7 @@ namespace SS
     ///
     ///
     ///
-    ///  
+    /// 
     /// <para>
     ///     An AbstractSpreadsheet object represents the state of a simple spreadsheet.  A 
     ///     spreadsheet consists of an infinite number of named cells.

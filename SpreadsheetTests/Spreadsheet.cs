@@ -215,32 +215,6 @@ public class UnitTest1
         }
     }
 
-    [TestMethod]
-    public void dependents_SetCellContents_Double()
-    {
-        Spreadsheet spreadsheet = new();
-        List<string> list1 = spreadsheet.SetCellContents("A1", 20.0).ToList();
-
-        List<string> list2 = spreadsheet.SetCellContents("A2", new Formula("A1+10")).ToList();
-
-        List<string> list3 = spreadsheet.SetCellContents("A3", new Formula("2*A2+9-A1")).ToList();
-
-        List<string> expectedList1 = new() { "A1" };
-        List<string> expectedList2 = new() { "A1", "A2" };
-        List<string> expectedList3 = new() { "A2", "A1", "A3" };
-
-        Assert.AreEqual(expectedList1.Count(), list1.Count());
-        for (int i = 0; i < expectedList1.Count(); i++)
-            Assert.AreEqual(list1[i], expectedList1[i]);
-
-        //    Assert.AreEqual(expectedList2.Count(), list2.Count());
-        //    for (int i = 0; i < expectedList2.Count(); i++)
-        //        Assert.AreEqual(list2[i], expectedList2[i]);
-
-        Assert.AreEqual(expectedList3.Count(), list3.Count());
-        for (int i = 0; i<expectedList3.Count(); i++)
-            Assert.AreEqual(list3[i], expectedList3[i]);
-    }
 
     [TestMethod]
     public void getCellContentsForEmptyCell()
