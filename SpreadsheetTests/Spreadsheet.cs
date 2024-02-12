@@ -231,4 +231,20 @@ public class UnitTest1
         for (int i = 0; i < expectedList3.Count(); i++)
             Assert.AreEqual(list3[i], expectedList3[i]);
     }
+
+    [TestMethod]
+    public void getCellContentsForEmptyCell()
+    {
+        Spreadsheet spreadsheet = new();
+        Assert.AreEqual("", spreadsheet.GetCellContents("A1"));
+    }
+
+
+    /// Tests for AbstractSpreadsheet class
+
+    [TestMethod]
+    public void getDirectDependents_Exception()
+    {
+        AbstractSpreadsheet spreadsheet = new Spreadsheet();
+    }
 }

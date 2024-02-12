@@ -213,28 +213,28 @@ namespace SS
                 return this.cellContent;
             }
 
-            private IEnumerable<string> getDependents()
-            {
-                if (cellContent.GetType() == typeof(Formula))
-                {
-                    Formula formula = (Formula)cellContent;
-                    return formula.GetVariables();
-                }
-                else
-                    return new HashSet<string>();
-            }
+            /// <summary>
+            /// 
+            /// Intentionally Commented :
+            /// Leaving it blank as this assignment does not need the value of the cell
+            /// </summary>
 
-            private double computeCellValue()
-            {
-                if (cellContent.GetType() == typeof(Double))
-                    this.cellValue = (Double)cellContent;
-                return cellValue;
-            }
+            //private double computeCellValue()
+            //{
+            //    if (cellContent.GetType() == typeof(Double))
+            //        this.cellValue = (Double)cellContent;
+            //    return cellValue;
+            //}
 
-            public object getValue()
-            {
-                return this.cellValue;
-            }
+            /// <summary>
+            /// 
+            /// Intentionally Commented :
+            /// Leaving it blank as this assignment does not need the value of the cell
+            /// </summary>
+            //public object getValue()
+            //{
+            //    return this.cellValue;
+            //}
         }
 
     }
