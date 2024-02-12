@@ -19,7 +19,7 @@ namespace SS
     ///  of a spreadsheet that can store the relation between two cells and can also
     ///  let the user know number of nonEmpty cells in this spreadsheet
     /// </summary>
-    public class Spreadsheet :AbstractSpreadsheet
+    public class Spreadsheet : AbstractSpreadsheet
     {
         // Dependency Graph to store connections between cells
         private DependencyGraph cellDependency;
