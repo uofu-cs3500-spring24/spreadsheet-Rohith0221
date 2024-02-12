@@ -23,6 +23,91 @@ public class UnitTest1
     }
 
     [TestMethod]
+    [ExpectedException(typeof(CircularException))]
+    public void circularExceptionThrown()
+    {
+        Spreadsheet spreadsheet = new();
+        spreadsheet.SetCellContents("A1", 20.0);
+        spreadsheet.SetCellContents("A2", new Formula("A1+10"));
+        spreadsheet.SetCellContents("A3", new Formula("A4*A2"));
+        spreadsheet.SetCellContents("A5", new Formula("A1-A5"));
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(CircularException))]
+    public void circularExceptionThrown2()
+    {
+        Spreadsheet spreadsheet = new();
+        spreadsheet.SetCellContents("A1", new Formula("A1"));
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void setCellContent_Exception_DoubleContent_NullName()
+    {
+        Spreadsheet spreadsheet = new();
+        spreadsheet.SetCellContents(null, 20.0);
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void setCellContent_Exception_DoubleContent_InvalidName()
+    {
+        Spreadsheet spreadsheet = new();
+        spreadsheet.SetCellContents("A@", 20.0);
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void setCellContent_Exception_StringContent_NullName()
+    {
+        Spreadsheet spreadsheet = new();
+        spreadsheet.SetCellContents(null,"2.0");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void setCellContent_Exception_StringContent_InvalidName()
+    {
+        Spreadsheet spreadsheet = new();
+        spreadsheet.SetCellContents("A@","2.0");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(ArgumentNullException))]
+    public void setCellContent_Exception_StringContent_NullString()
+    {
+        Spreadsheet spreadsheet = new();
+        String s = null;
+        spreadsheet.SetCellContents("A1",s);
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(ArgumentNullException))]
+    public void setCellContent_Exception_FormulaContent_NullFormula()
+    {
+        Spreadsheet spreadsheet = new();
+        Formula f = null;
+        spreadsheet.SetCellContents("X1", f);
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void setCellContent_Exception_FormulaContent_NullName()
+    {
+        Spreadsheet spreadsheet = new();
+        spreadsheet.SetCellContents(null, new Formula("2.0"));
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void setCellContent_Exception_FormulaContent_InvalidName()
+    {
+        Spreadsheet spreadsheet = new();
+        spreadsheet.SetCellContents("A@", new Formula("2.0"));
+    }
+
+    [TestMethod]
     public void test_CellConstructor1()
     {
         Spreadsheet spreadsheet = new();
@@ -120,5 +205,30 @@ public class UnitTest1
         }
     }
 
+    [TestMethod]
+    public void dependents_SetCellContents_Double()
+    {
+        Spreadsheet spreadsheet = new();
+        List<string> list1 = spreadsheet.SetCellContents("A1",20.0).ToList();
 
+        List<string> list2 = spreadsheet.SetCellContents("A2", new Formula("A1+10")).ToList();
+
+        List<string> list3 = spreadsheet.SetCellContents("A3", new Formula("2*A2+9-A1")).ToList();
+
+        List<string> expectedList1 = new() { "A1" };
+        List<string> expectedList2 = new() { "A1","A2" };
+        List<string> expectedList3 = new() { "A2","A1","A3" };
+
+        Assert.AreEqual(expectedList1.Count(), list1.Count());
+        for (int i = 0; i < expectedList1.Count(); i++)
+            Assert.AreEqual(list1[i], expectedList1[i]);
+
+        Assert.AreEqual(expectedList2.Count(), list2.Count());
+        for (int i = 0; i < expectedList2.Count(); i++)
+            Assert.AreEqual(list2[i], expectedList2[i]);
+
+        Assert.AreEqual(expectedList3.Count(), list3.Count());
+        for (int i = 0; i < expectedList3.Count(); i++)
+            Assert.AreEqual(list3[i], expectedList3[i]);
+    }
 }

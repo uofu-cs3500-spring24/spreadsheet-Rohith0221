@@ -7,16 +7,16 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SS
 {
-	public class Spreadsheet:AbstractSpreadsheet
-	{
+    public class Spreadsheet :AbstractSpreadsheet
+    {
         private DependencyGraph cellDependency;
         private Dictionary<string, Cell> nonEmptyCells;
 
         public Spreadsheet()
-		{
-            cellDependency= new();
+        {
+            cellDependency = new();
             nonEmptyCells = new();
-		}
+        }
 
         /// <summary>
         /// 
@@ -31,7 +31,7 @@ namespace SS
 
             if (nonEmptyCells.ContainsKey(name))
                 return nonEmptyCells[name].getCellContent();
-            return null;
+            return "";
         }
 
         /// <summary>
@@ -60,7 +60,6 @@ namespace SS
             if (name == null || !validateCellName(name))
                 throw new InvalidNameException();
 
-            cellDependency.AddDependency(name, "");
             HashSet<string> dependents = this.GetDirectDependents(name).ToHashSet();
             dependents.Add(name);
             if (nonEmptyCells.ContainsKey(name))
@@ -90,7 +89,6 @@ namespace SS
             else if (text == null)
                 throw new ArgumentNullException();
 
-            cellDependency.AddDependency(name, "");
 
             HashSet<string> dependents = this.GetDirectDependents(name).ToHashSet();
             dependents.Add(name);
@@ -116,13 +114,22 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
-            if (formula == null)
+            if (formula is null)
                 throw new ArgumentNullException();
             else if (name == null || !validateCellName(name))
                 throw new InvalidNameException();
 
             foreach (string dependent in formula.GetVariables())
                 cellDependency.AddDependency(dependent, name);
+
+            foreach (string n in GetDirectDependents(name))
+            {
+                if (n.Equals(name))
+                {
+                    throw new CircularException();
+                }
+            }
+
             HashSet<string> dependents = this.GetDirectDependents(name).ToHashSet();
             dependents.Add(name);
 
@@ -148,7 +155,7 @@ namespace SS
         {
             if (name == null || !validateCellName(name))
                 throw new InvalidNameException();
-            return cellDependency.GetDependents(name);
+            return cellDependency.GetDependees(name);
         }
 
         /// <summary>
@@ -161,7 +168,75 @@ namespace SS
             return Regex.IsMatch(cellName, @"^[a-zA-Z_][a-zA-Z0-9_]*$");
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private class Cell
+        {
+            private string cellName;
+            private object cellContent;
+            private double cellValue;
+
+            public Cell(string cellName, string cellContent)
+            {
+                this.cellName = cellName;
+                this.cellContent = cellContent;
+            }
+
+            public Cell(string cellName, double cellContent)
+            {
+                this.cellName = cellName;
+                this.cellContent = cellContent;
+                this.cellValue = cellContent;
+            }
+
+            public Cell(string cellName, Formula cellContent)
+            {
+                this.cellName = cellName;
+                this.cellName = cellName;
+                this.cellContent = cellContent;
+            }
+
+            public string getCellName()
+            {
+                return this.cellName;
+            }
+
+            public void setCellContent(object cellContent)
+            {
+                this.cellContent = cellContent;
+            }
+
+            public object getCellContent()
+            {
+                return this.cellContent;
+            }
+
+            private IEnumerable<string> getDependents()
+            {
+                if (cellContent.GetType() == typeof(Formula))
+                {
+                    Formula formula = (Formula)cellContent;
+                    return formula.GetVariables();
+                }
+                else
+                    return new HashSet<string>();
+            }
+
+            private double computeCellValue()
+            {
+                if (cellContent.GetType() == typeof(Double))
+                    this.cellValue = (Double)cellContent;
+                return cellValue;
+            }
+
+            public object getValue()
+            {
+                return this.cellValue;
+            }
+        }
+
     }
 
 }
-
