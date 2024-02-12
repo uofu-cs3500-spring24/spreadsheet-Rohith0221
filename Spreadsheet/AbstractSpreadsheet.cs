@@ -4,8 +4,10 @@ using System;
 using System.Collections.Generic;
 using SpreadsheetUtilities;
 
+
 namespace SS
 {
+    
 
     /// <summary>
     /// Thrown to indicate that a change to a cell will cause a circular dependency.
@@ -22,8 +24,12 @@ namespace SS
     {
     }
 
-
+    
     /// <summary>
+    ///
+    ///
+    ///
+    ///  
     /// <para>
     ///     An AbstractSpreadsheet object represents the state of a simple spreadsheet.  A 
     ///     spreadsheet consists of an infinite number of named cells.
@@ -284,6 +290,7 @@ namespace SS
             HashSet<String>    visited = new HashSet<String>();
             foreach (String name in names)
             {
+                // if cellName that is a dependent is not visited visits it
                 if (!visited.Contains(name))
                 {
                     Visit(name, name, visited, changed);
