@@ -131,6 +131,9 @@ namespace SS
             }
 
             HashSet<string> dependents = this.GetDirectDependents(name).ToHashSet();
+            HashSet<string> indirectDependents = GetCellsToRecalculate(dependents).ToHashSet();
+            foreach (string eachIndirect in indirectDependents)
+                dependents.Add(eachIndirect);
             dependents.Add(name);
 
             if (nonEmptyCells.ContainsKey(name))
@@ -196,11 +199,6 @@ namespace SS
                 this.cellName = cellName;
                 this.cellName = cellName;
                 this.cellContent = cellContent;
-            }
-
-            public string getCellName()
-            {
-                return this.cellName;
             }
 
             public void setCellContent(object cellContent)

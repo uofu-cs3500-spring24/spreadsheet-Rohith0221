@@ -208,9 +208,9 @@ namespace SS
         /// values depend directly on the value of the named cell. 
         /// </summary>
         /// 
-        /// <exception cref="InvalidNameException"> 
-        ///   If the name is null or invalid, throw an InvalidNameException
-        /// </exception>
+        /// <requires>
+        ///  The name that is passed in must be valid.
+        /// </requires>
         /// 
         /// <param name="name"></param>
         /// <returns>

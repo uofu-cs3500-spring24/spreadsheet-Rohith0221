@@ -239,12 +239,4 @@ public class UnitTest1
         Assert.AreEqual("", spreadsheet.GetCellContents("A1"));
     }
 
-
-    /// Tests for AbstractSpreadsheet class
-
-    [TestMethod]
-    public void getDirectDependents_Exception()
-    {
-        AbstractSpreadsheet spreadsheet = new Spreadsheet();
-    }
 }
