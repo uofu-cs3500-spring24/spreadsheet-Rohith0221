@@ -260,16 +260,6 @@ namespace SpreadsheetUtilities
                 foreach (string newDependee in newDependees)
                 {
                 AddDependency(newDependee, s);
-                    //// if a key string s already exists, it adds dependee to that key
-                    //if (nodesGraphDependents.ContainsKey(newDependee))
-                    //    nodesGraphDependents[newDependee].Add(s);
-                    //else
-                    //{
-                    //    // creates a new key entry in the dictionary if doesn't exist and adds
-                    //    // dependee to this key string s
-                    //    nodesGraphDependents.Add(newDependee, new HashSet<string>());
-                    //    nodesGraphDependents[newDependee].Add(s);
-                    //}
                 }
         }
 

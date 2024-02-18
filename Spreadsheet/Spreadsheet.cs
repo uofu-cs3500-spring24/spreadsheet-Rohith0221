@@ -80,10 +80,9 @@ namespace SS
             if (name == null || !validateCellName(name))
                 throw new InvalidNameException();
 
+            cellDependency.ReplaceDependees(name, new HashSet<string>());
             // Gets all the dependents by calling GetCellsToRecalculate method defined in Abstract class
             HashSet<string> dependents = GetCellsToRecalculate(name).ToHashSet();
-
-            dependents.Add(name);
 
             // if dictionary already stores the cell then overwrites the cell contents to the given number
             if (nonEmptyCells.ContainsKey(name))
@@ -117,11 +116,9 @@ namespace SS
             else if (text == null)
                 throw new ArgumentNullException();
 
+            cellDependency.ReplaceDependees(name, new HashSet<string>());
             // Gets all the dependents by calling GetCellsToRecalculate method defined in Abstract class
-            HashSet<string> dependents = GetCellsToRecalculate(name).ToHashSet();
-
-
-            dependents.Add(name);
+            HashSet<string> dependents = GetCellsToRecalculate(name).Reverse().ToHashSet();
 
             // if dictionary already stores the cell then overwrites the cell contents to the given number
             if (nonEmptyCells.ContainsKey(name))
@@ -157,21 +154,10 @@ namespace SS
                 throw new InvalidNameException();
 
             // gets All the dependents in the formula and adds a connection with them for the cellName
-            foreach (string dependent in formula.GetVariables())
-                cellDependency.AddDependency(dependent, name);
-
-            // gets each dependent from the dependent list of cellName and if cellName is also one among them, throws a Circular Exception
-            foreach (string n in GetDirectDependents(name))
-            {
-                if (n.Equals(name))
-                {
-                    throw new CircularException();
-                }
-            }
+            cellDependency.ReplaceDependees(name, formula.GetVariables());
 
             // Recalculates cells if needed and returns dependents of the cell
             HashSet<string> dependents = GetCellsToRecalculate(name).ToHashSet();
-            dependents.Add(name);
 
             // if dictionary already stores the cell then overwrites the cell contents to the given number
             if (nonEmptyCells.ContainsKey(name))
