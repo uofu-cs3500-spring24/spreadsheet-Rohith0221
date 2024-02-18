@@ -277,22 +277,22 @@ namespace SS
             /// Leaving it blank as this assignment does not need the value of the cell
             /// </summary>
 
-            //private double computeCellValue()
-            //{
-            //    if (cellContent.GetType() == typeof(Double))
-            //        this.cellValue = (Double)cellContent;
-            //    return cellValue;
-            //}
+            private double computeCellValue()
+            {
+                if (cellContent.GetType() == typeof(Double))
+                    this.cellValue = (Double)cellContent;
+                return cellValue;
+            }
 
             /// <summary>
             /// 
             /// Intentionally Commented :
             /// Leaving it blank as this assignment does not need the value of the cell
             /// </summary>
-            //public object getValue()
-            //{
-            //    return this.cellValue;
-            //}
+            public object getValue()
+            {
+                return this.cellValue;
+            }
         }
 
     }
