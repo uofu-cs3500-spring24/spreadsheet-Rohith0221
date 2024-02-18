@@ -31,6 +31,8 @@ namespace SS
             nonEmptyCells = new();
         }
 
+        public override bool Changed { get => throw new NotImplementedException(); protected set => throw new NotImplementedException(); }
+
         /// <summary>
         ///  Given a cell name returns the contents in it
         /// </summary>
@@ -50,6 +52,11 @@ namespace SS
             return "";
         }
 
+        public override object GetCellValue(string name)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Returns an Enumerable of all the names of cells that are having non-Empty cell Contents
         /// </summary>
@@ -65,6 +72,21 @@ namespace SS
                     if (!nonEmptyCells[cellName].getCellContent().Equals(""))
                         nonEmptyCellNames.Add(cellName);
             return nonEmptyCellNames;
+        }
+
+        public override string GetSavedVersion(string filename)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GetXML()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Save(string filename)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -171,6 +193,11 @@ namespace SS
                 nonEmptyCells.Add(name, cell);
             }
             return dependents;
+        }
+
+        public override IList<string> SetContentsOfCell(string name, string content)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
