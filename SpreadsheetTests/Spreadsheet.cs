@@ -326,6 +326,8 @@ public class UnitTest1
         Assert.IsFalse(s.Changed);
     }
 
+    // Recalculation Tests
+
 
     // Exception cases
 

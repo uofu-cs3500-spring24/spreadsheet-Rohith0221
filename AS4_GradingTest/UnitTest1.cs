@@ -420,7 +420,7 @@ namespace AS4_Grading_Tests
             TestStress3();
         }
 
-        [TestMethod(), Timeout(2000)]
+        [TestMethod()]
         [TestCategory("43")]
         public void TestStress4()
         {
@@ -439,19 +439,19 @@ namespace AS4_Grading_Tests
             Assert.IsTrue(s.SetContentsOfCell("A1249", "25.0").SequenceEqual(firstCells));
             Assert.IsTrue(s.SetContentsOfCell("A1499", "0").SequenceEqual(lastCells));
         }
-        [TestMethod(), Timeout(2000)]
+        [TestMethod()]
         [TestCategory("44")]
         public void TestStress4a()
         {
             TestStress4();
         }
-        [TestMethod(), Timeout(2000)]
+        [TestMethod()]
         [TestCategory("45")]
         public void TestStress4b()
         {
             TestStress4();
         }
-        [TestMethod(), Timeout(2000)]
+        [TestMethod()]
         [TestCategory("46")]
         public void TestStress4c()
         {

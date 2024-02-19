@@ -89,6 +89,14 @@ namespace SS
 
         public override string GetSavedVersion(string filename)
         {
+            try
+            {
+
+            }
+            catch (Exception)
+            {
+                throw new SpreadsheetReadWriteException(" Unable to open the given file ");
+            }
             throw new NotImplementedException();
         }
 
@@ -130,8 +138,18 @@ namespace SS
             else
             {
                 Cell cell = new(normalisedCellName, number);
+                cell.setCellValue(number);
                 nonEmptyCells.Add(normalisedCellName, cell);
+                
             }
+
+            foreach (string dependent in dependents)
+            {
+                if (dependent.Equals(name))
+                    continue;
+                nonEmptyCells[dependent].setCellValue(computeCellValue(nonEmptyCells[dependent]));
+            }
+
             return dependents;// list to store the cells dependent on the current cell
         }
 
@@ -171,6 +189,14 @@ namespace SS
                 Cell cell = new(normalisedCellName, text);
                 nonEmptyCells.Add(normalisedCellName, cell);
             }
+
+            foreach (string dependent in dependents)
+            {
+                if (dependent.Equals(name))
+                    continue;
+                nonEmptyCells[dependent].setCellValue(computeCellValue(nonEmptyCells[dependent]));
+            }
+
             return dependents;// list to store the cells dependent on the current cell
         }
 
@@ -235,6 +261,14 @@ namespace SS
                 cell.setCellValue(computeCellValue(cell));
                 nonEmptyCells.Add(name, cell);
             }
+
+            foreach (string dependent in dependents)
+            {
+                if (dependent.Equals(name))
+                    continue;
+                nonEmptyCells[dependent].setCellValue(computeCellValue(nonEmptyCells[dependent]));
+            }
+
             return dependents;
         }
 
