@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpreadsheetTests", "Spreads
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "newSpreadsheetTests", "newSpreadsheetTests\newSpreadsheetTests.csproj", "{F0AA335A-86C1-4334-A364-62A293070A9E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AS4_GradingTest", "AS4_GradingTest\AS4_GradingTest.csproj", "{37110C66-46D0-42EE-B563-326E0CAC2977}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{F0AA335A-86C1-4334-A364-62A293070A9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F0AA335A-86C1-4334-A364-62A293070A9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F0AA335A-86C1-4334-A364-62A293070A9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37110C66-46D0-42EE-B563-326E0CAC2977}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37110C66-46D0-42EE-B563-326E0CAC2977}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37110C66-46D0-42EE-B563-326E0CAC2977}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37110C66-46D0-42EE-B563-326E0CAC2977}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

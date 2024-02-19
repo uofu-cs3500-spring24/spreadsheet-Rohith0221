@@ -633,6 +633,7 @@ namespace SpreadsheetUtilities
         {
             return Regex.IsMatch(variableToBeChecked, @"^[a-zA-Z_][a-zA-Z0-9_]*$");
         }
+
         /// <summary>
         /// Checks the next token if a valid operator or token is given,if not returns false
         /// </summary>

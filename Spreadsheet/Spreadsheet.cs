@@ -31,13 +31,14 @@ namespace SS
 
             cellDependency = new();
             this.nonEmptyCells = new();
-            changed = false;
+            Changed = false;
         }
 
         public Spreadsheet(Func<string, bool> isValid, Func<string, string> normalize, string version) : base(isValid, normalize, version)
         {
             cellDependency = new();
             nonEmptyCells = new();
+            Changed = false;
         }
 
         public Spreadsheet(string filePath, Func<string, bool> isValid, Func<string, string> normalize, string version) : base(isValid, normalize, version)
@@ -47,7 +48,7 @@ namespace SS
             nonEmptyCells = new();
         }
 
-        public override bool Changed { get =>changed ; protected set => changed=true; }
+        public override bool Changed { get =>changed ; protected set => (value)=changed=value; }
 
         /// <summary>
         ///  Given a cell name returns the contents in it
@@ -108,27 +109,28 @@ namespace SS
         /// <param name="number"></param> The number to which content of the given cell name is to be changed
         /// <returns></returns> A Set consisting of all the cells dependent on the given cellName
         /// <exception cref="InvalidNameException"></exception> Throws an exception if cellName is invalid or null
-        public override ISet<string> SetCellContents(string name, double number)
+        protected override IList<string> SetCellContents(string name, double number)
         {
             string normalisedCellName = Normalize(name);
             // if CellName is null or Invalid throws an exception
-            if (normalisedCellName == null || !validateCellName(normalisedCellName) || validateCellName(normalisedCellName) && IsValid(normalisedCellName))
+            if (normalisedCellName == null || !validateCellName(normalisedCellName) || validateCellName(normalisedCellName) && !IsValid(normalisedCellName))
                 throw new InvalidNameException();
 
-            cellDependency.ReplaceDependees(name, new HashSet<string>());
+            cellDependency.ReplaceDependees(normalisedCellName, new HashSet<string>());
             // Gets all the dependents by calling GetCellsToRecalculate method defined in Abstract class
-            HashSet<string> dependents = GetCellsToRecalculate(name).ToHashSet();
+            List<string> dependents = GetCellsToRecalculate(normalisedCellName).ToList();
 
             // if dictionary already stores the cell then overwrites the cell contents to the given number
-            if (nonEmptyCells.ContainsKey(name))
+            if (nonEmptyCells.ContainsKey(normalisedCellName))
             {
-                nonEmptyCells[name].setCellContent(number);
+                nonEmptyCells[normalisedCellName].setCellContent(number);
+                nonEmptyCells[normalisedCellName].setCellValue(number);
             }
             // If dictionary doesn't contain the cellName ,Creates a new entry of the cellName and the cell
             else
             {
-                Cell cell = new(name, number);
-                nonEmptyCells.Add(name, cell);
+                Cell cell = new(normalisedCellName, number);
+                nonEmptyCells.Add(normalisedCellName, cell);
             }
             return dependents;// list to store the cells dependent on the current cell
         }
@@ -142,29 +144,32 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception> Throws an exception if cellName is invalid or null
         /// <exception cref="ArgumentNullException"></exception> Throws an exception if text is null
 
-        public override ISet<string> SetCellContents(string name, string text)
+        protected override IList<string> SetCellContents(string name, string text)
         {
+            string normalisedCellName = Normalize(name);
             // if CellName is null or Invalid throws an exception
-            if (name == null || !validateCellName(name))
+            if (normalisedCellName == null || !validateCellName(normalisedCellName) || validateCellName(normalisedCellName) && !IsValid(normalisedCellName))
                 throw new InvalidNameException();
             // if given text is null throws an exception
             else if (text == null)
                 throw new ArgumentNullException();
 
-            cellDependency.ReplaceDependees(name, new HashSet<string>());
+            cellDependency.ReplaceDependees(normalisedCellName, new HashSet<string>());
+
             // Gets all the dependents by calling GetCellsToRecalculate method defined in Abstract class
-            HashSet<string> dependents = GetCellsToRecalculate(name).Reverse().ToHashSet();
+            List<string> dependents = GetCellsToRecalculate(normalisedCellName).ToList();
 
             // if dictionary already stores the cell then overwrites the cell contents to the given number
-            if (nonEmptyCells.ContainsKey(name))
+            if (nonEmptyCells.ContainsKey(normalisedCellName))
             {
-                nonEmptyCells[name].setCellContent(text);
+                nonEmptyCells[normalisedCellName].setCellContent(text);
+                nonEmptyCells[normalisedCellName].setCellValue(text);
             }
             // If dictionary doesn't contain the cellName ,Creates a new entry of the cellName and the cell
             else
             {
-                Cell cell = new(name, text);
-                nonEmptyCells.Add(name, cell);
+                Cell cell = new(normalisedCellName, text);
+                nonEmptyCells.Add(normalisedCellName, cell);
             }
             return dependents;// list to store the cells dependent on the current cell
         }
@@ -179,25 +184,42 @@ namespace SS
         /// <exception cref="ArgumentNullException"></exception> Throws an exception if text is null
         /// <exception cref="CircularException"></exception> Throws an exception if formula is having the cellName either directly or indirectly
 
-        public override ISet<string> SetCellContents(string name, Formula formula)
+        protected override IList<string> SetCellContents(string name, Formula formula)
         {
+            List<string> dependents;
+            object previousCellContent;
             if (formula is null)
                 throw new ArgumentNullException();
 
             // if CellName is null or Invalid throws an exception
-            else if (name == null || !validateCellName(name))
+            else if (name == null || !validateCellName(name) || validateCellName(name) && !IsValid(name))
                 throw new InvalidNameException();
 
-            // gets All the dependents in the formula and adds a connection with them for the cellName
-            cellDependency.ReplaceDependees(name, formula.GetVariables());
+            if (nonEmptyCells.ContainsKey(name))
+                previousCellContent = nonEmptyCells[name].getCellContent();
 
-            // Recalculates cells if needed and returns dependents of the cell
-            HashSet<string> dependents = GetCellsToRecalculate(name).ToHashSet();
+            List<string> oldDependees = cellDependency.GetDependees(name).ToList();
+            // gets All the dependents in the formula and adds a connection with them for the cellName
+            try
+            {
+                cellDependency.ReplaceDependees(name, formula.GetVariables());
+
+                // Recalculates cells if needed and returns dependents of the cell
+                dependents = GetCellsToRecalculate(name).ToList();
+            }
+            catch(CircularException)
+            {
+                
+                cellDependency.ReplaceDependees(name, oldDependees);
+                throw new CircularException();
+            }
 
             // if dictionary already stores the cell then overwrites the cell contents to the given number
             if (nonEmptyCells.ContainsKey(name))
             {
                 nonEmptyCells[name].setCellContent(formula);
+                object formulaValue = nonEmptyCells[name].getValue();
+                nonEmptyCells[name].setCellValue(formulaValue);
             }
             // If dictionary doesn't contain the cellName ,Creates a new entry of the cellName and the cell
             else
@@ -210,7 +232,44 @@ namespace SS
 
         public override IList<string> SetContentsOfCell(string name, string content)
         {
-            throw new NotImplementedException();
+            string normalisedCellName = Normalize(name);
+            object previousCellContents=null;
+            if (nonEmptyCells.ContainsKey(normalisedCellName))
+                previousCellContents = nonEmptyCells[normalisedCellName].getCellContent();
+            if (!validateCellName(normalisedCellName))
+                throw new InvalidNameException();
+            if (Double.TryParse(content, out double result))
+            {
+                Changed = true;
+                return SetCellContents(name, result); ;
+            }
+            else if (content.StartsWith("="))
+            {
+                try
+                {
+                    Changed = true;
+                    Formula parsedRemainder = new(content.Substring(1));
+                    return SetCellContents(normalisedCellName, parsedRemainder);
+                }
+                catch (CircularException)
+                {
+                    if (previousCellContents != null && previousCellContents.GetType() == typeof(double))
+                    {
+                        return SetCellContents(normalisedCellName, (double)previousCellContents);
+                    }
+                    else if (previousCellContents != null && previousCellContents.GetType() == typeof(string))
+                        return SetCellContents(normalisedCellName, (string)previousCellContents);
+                    else if (previousCellContents != null && previousCellContents.GetType() == typeof(Formula))
+                        return SetCellContents(normalisedCellName, (Formula)previousCellContents);
+                    else
+                        throw new CircularException();
+                }
+            }
+            if (!content.StartsWith("=") && content.GetType() == typeof(string) && !Double.TryParse(content, out double parsedValue))
+            {
+                return SetCellContents(normalisedCellName, (string)content);
+            }
+            return null; // stub value
         }
 
         /// <summary>
@@ -234,7 +293,7 @@ namespace SS
         /// <returns></returns> true if valid name or false
         private bool validateCellName(string cellName)
         {
-            return Regex.IsMatch(cellName, "^[a - zA - Z] +\\d +$");
+            return Regex.IsMatch(cellName, "^[a-zA-Z]+\\d+$");
         }
 
 
@@ -323,6 +382,7 @@ namespace SS
                     return cellValue;
                 else if (cellContent.GetType() == typeof(string))
                     return cellValue;
+
                 return cellValue;
             }
 
@@ -334,6 +394,16 @@ namespace SS
             public object getValue()
             {
                 return this.cellValue;
+            }
+
+            public void setCellValue(object value)
+            {
+                if (value.GetType() == typeof(Formula))
+                {
+                    Formula formula = (Formula)value;
+                    //cellValue = formula.Evaluate((formula.GetVariables()));
+                }
+                cellValue = value;
             }
         }
         
