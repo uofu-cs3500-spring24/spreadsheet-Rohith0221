@@ -109,8 +109,8 @@ namespace AS4_Grading_Tests
             Spreadsheet s = new Spreadsheet();
             s.SetContentsOfCell("Z7","=3");
             Formula f = (Formula)s.GetCellContents("Z7");
-            Assert.AreEqual("=3", f);
-            Assert.AreNotEqual("=2", f);
+            Assert.AreEqual("=3", f.ToString());
+            Assert.AreNotEqual("=2", f.ToString());
         }
 
         // CIRCULAR FORMULA DETECTION
@@ -302,8 +302,8 @@ namespace AS4_Grading_Tests
             Spreadsheet s = new Spreadsheet();
             s.SetContentsOfCell("A1", "Hello");
             s.SetContentsOfCell("A1", "=23");
-            Assert.AreEqual("=23", (Formula)s.GetCellContents("A1"));
-            Assert.AreNotEqual("=24", (Formula)s.GetCellContents("A1"));
+            Assert.AreEqual("=23",s.GetCellContents("A1").ToString());
+            Assert.AreNotEqual("=24",s.GetCellContents("A1").ToString());
         }
 
         // STRESS TESTS

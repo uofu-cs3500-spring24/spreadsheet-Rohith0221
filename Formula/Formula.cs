@@ -358,7 +358,7 @@ namespace SpreadsheetUtilities
                 // are found, add them to the normalisedVariableTokens list
                 if (token.Equals("+") || token.Equals("-") || token.Equals("*")
                 || token.Equals("/") || token.Equals("(") || token.Equals(")")
-                || Double.TryParse(token, out double castValue))
+                || Double.TryParse(token, out double castValue)||token.Equals("="))
                     continue;
                 normalisedVariableTokens.Add(token);
             }

@@ -187,7 +187,7 @@ namespace SS
         protected override IList<string> SetCellContents(string name, Formula formula)
         {
             List<string> dependents;
-            object previousCellContent;
+            Cell previousCell = null ;
             if (formula is null)
                 throw new ArgumentNullException();
 
@@ -196,9 +196,9 @@ namespace SS
                 throw new InvalidNameException();
 
             if (nonEmptyCells.ContainsKey(name))
-                previousCellContent = nonEmptyCells[name].getCellContent();
+                previousCell = nonEmptyCells[name];
 
-            List<string> oldDependees = cellDependency.GetDependees(name).ToList();
+            List<string> oldDependees = cellDependency.GetDependents(name).ToList();
             // gets All the dependents in the formula and adds a connection with them for the cellName
             try
             {
@@ -211,6 +211,7 @@ namespace SS
             {
                 
                 cellDependency.ReplaceDependees(name, oldDependees);
+                nonEmptyCells[name] = previousCell;
                 throw new CircularException();
             }
 
@@ -232,6 +233,8 @@ namespace SS
 
         public override IList<string> SetContentsOfCell(string name, string content)
         {
+            if (content.Equals(""))
+                return new List<string>();
             string normalisedCellName = Normalize(name);
             object previousCellContents=null;
             if (nonEmptyCells.ContainsKey(normalisedCellName))
@@ -245,25 +248,24 @@ namespace SS
             }
             else if (content.StartsWith("="))
             {
-                try
-                {
+                //try
+                //{
                     Changed = true;
-                    //Formula parsedRemainder = new(content.Substring(1), Normalize, s => { if (s.StartsWith("=")) return true;return false;}) ;
                     return SetCellContents(normalisedCellName,new Formula(content));
-                }
-                catch (CircularException)
-                {
-                    if (previousCellContents != null && previousCellContents.GetType() == typeof(double))
-                    {
-                        return SetCellContents(normalisedCellName, (double)previousCellContents);
-                    }
-                    else if (previousCellContents != null && previousCellContents.GetType() == typeof(string))
-                        return SetCellContents(normalisedCellName, (string)previousCellContents);
-                    else if (previousCellContents != null && previousCellContents.GetType() == typeof(Formula))
-                        return SetCellContents(normalisedCellName, (Formula)previousCellContents);
-                    else
-                        throw new CircularException();
-                }
+                //}
+                //catch (CircularException)
+                //{
+                //    if (previousCellContents != null && previousCellContents.GetType() == typeof(double))
+                //    {
+                //        return SetCellContents(normalisedCellName, (double)previousCellContents);
+                //    }
+                //    else if (previousCellContents != null && previousCellContents.GetType() == typeof(string))
+                //        return SetCellContents(normalisedCellName, (string)previousCellContents);
+                //    else if (previousCellContents != null && previousCellContents.GetType() == typeof(Formula))
+                //        return SetCellContents(normalisedCellName, (Formula)previousCellContents);
+                //    else
+                //        throw new CircularException();
+                //}
             }
             if (!content.StartsWith("=") && content.GetType() == typeof(string) && !Double.TryParse(content, out double parsedValue))
             {
