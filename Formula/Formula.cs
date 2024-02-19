@@ -549,7 +549,7 @@ namespace SpreadsheetUtilities
 
             // Rule 5 Starting token rule violated
             if (!(tokensToBeValidated[0].Equals("(") || validateIsVariable(tokensToBeValidated[0])
-                || Double.TryParse(tokensToBeValidated[0], out double doubleValue)))
+                || Double.TryParse(tokensToBeValidated[0], out double doubleValue)|| tokensToBeValidated[0].Equals("=")))
                 throw new FormulaFormatException($"Starting token rule violated : {tokensToBeValidated[0]} found");
             // Rule 6 Ending token rule violated
             else if (!(tokensToBeValidated[tokensToBeValidated.Count - 1].Equals(")") || validateIsVariable(tokensToBeValidated[tokensToBeValidated.Count - 1])
@@ -566,6 +566,8 @@ namespace SpreadsheetUtilities
                     opening_bracesCount += 1;
                 if (tokensToBeValidated[i].Equals(")"))
                     closing_bracesCount += 1;
+                if (tokensToBeValidated[0].Equals("="))
+                    continue;
 
                 // Rule 1 :checks if the parsed token is any of these,if not throws exception
                 if (!checkIfAnyValidToken(tokensToBeValidated[i]))

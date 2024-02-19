@@ -51,7 +51,7 @@ namespace AS4_Grading_Tests
         public void TestGetEmptyContents()
         {
             Spreadsheet s = new Spreadsheet();
-            Assert.AreEqual("", s.GetCellContents("=A2"));
+            Assert.AreEqual("", s.GetCellContents("A2"));
         }
 
         // SETTING CELL TO A DOUBLE

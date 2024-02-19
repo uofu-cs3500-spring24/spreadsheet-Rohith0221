@@ -248,8 +248,8 @@ namespace SS
                 try
                 {
                     Changed = true;
-                    Formula parsedRemainder = new(content.Substring(1));
-                    return SetCellContents(normalisedCellName, parsedRemainder);
+                    //Formula parsedRemainder = new(content.Substring(1), Normalize, s => { if (s.StartsWith("=")) return true;return false;}) ;
+                    return SetCellContents(normalisedCellName,new Formula(content));
                 }
                 catch (CircularException)
                 {
