@@ -25,8 +25,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spreadsheet", "Spreadsheet\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpreadsheetTests", "SpreadsheetTests\SpreadsheetTests.csproj", "{65210E76-4A37-42DC-A608-9A5DB6B2861A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "newSpreadsheetTests", "newSpreadsheetTests\newSpreadsheetTests.csproj", "{F0AA335A-86C1-4334-A364-62A293070A9E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AS4_GradingTest", "AS4_GradingTest\AS4_GradingTest.csproj", "{37110C66-46D0-42EE-B563-326E0CAC2977}"
 EndProject
 Global
@@ -67,10 +65,6 @@ Global
 		{65210E76-4A37-42DC-A608-9A5DB6B2861A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{65210E76-4A37-42DC-A608-9A5DB6B2861A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{65210E76-4A37-42DC-A608-9A5DB6B2861A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F0AA335A-86C1-4334-A364-62A293070A9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F0AA335A-86C1-4334-A364-62A293070A9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F0AA335A-86C1-4334-A364-62A293070A9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F0AA335A-86C1-4334-A364-62A293070A9E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{37110C66-46D0-42EE-B563-326E0CAC2977}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{37110C66-46D0-42EE-B563-326E0CAC2977}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37110C66-46D0-42EE-B563-326E0CAC2977}.Release|Any CPU.ActiveCfg = Release|Any CPU

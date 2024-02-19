@@ -212,11 +212,13 @@ namespace SS
                 if (previousCell == null)
                 {
                     nonEmptyCells.Remove(name);
+                    Changed = false;
                     cellDependency.ReplaceDependees(name, new HashSet<string>());
                     throw new CircularException();
                 }
                 cellDependency.ReplaceDependees(name, oldDependees);
                 nonEmptyCells[name] = previousCell;
+                Changed=false;
                 throw new CircularException();
             }
 
@@ -224,13 +226,13 @@ namespace SS
             if (nonEmptyCells.ContainsKey(name))
             {
                 nonEmptyCells[name].setCellContent(formula);
-                object formulaValue = nonEmptyCells[name].getValue();
-                nonEmptyCells[name].setCellValue(formulaValue);
+                 nonEmptyCells[name].setCellValue(computeCellValue(nonEmptyCells[name]));
             }
             // If dictionary doesn't contain the cellName ,Creates a new entry of the cellName and the cell
             else
             {
                 Cell cell = new(name, formula);
+                cell.setCellValue(computeCellValue(cell));
                 nonEmptyCells.Add(name, cell);
             }
             return dependents;
@@ -244,7 +246,7 @@ namespace SS
             object previousCellContents=null;
             if (nonEmptyCells.ContainsKey(normalisedCellName))
                 previousCellContents = nonEmptyCells[normalisedCellName].getCellContent();
-            if (!validateCellName(normalisedCellName))
+            if (!validateCellName(normalisedCellName) ||!IsValid(normalisedCellName)|| (validateCellName(normalisedCellName) && !IsValid(normalisedCellName)))
                 throw new InvalidNameException();
             if (Double.TryParse(content, out double result))
             {
@@ -253,24 +255,8 @@ namespace SS
             }
             else if (content.StartsWith("="))
             {
-                //try
-                //{
                     Changed = true;
-                    return SetCellContents(normalisedCellName,new Formula(content));
-                //}
-                //catch (CircularException)
-                //{
-                //    if (previousCellContents != null && previousCellContents.GetType() == typeof(double))
-                //    {
-                //        return SetCellContents(normalisedCellName, (double)previousCellContents);
-                //    }
-                //    else if (previousCellContents != null && previousCellContents.GetType() == typeof(string))
-                //        return SetCellContents(normalisedCellName, (string)previousCellContents);
-                //    else if (previousCellContents != null && previousCellContents.GetType() == typeof(Formula))
-                //        return SetCellContents(normalisedCellName, (Formula)previousCellContents);
-                //    else
-                //        throw new CircularException();
-                //}
+                    return SetCellContents(normalisedCellName,new Formula(content, s => s, s => { return Regex.IsMatch(s, "^[a-zA-Z]+\\d+$"); }));
             }
             if (!content.StartsWith("=") && content.GetType() == typeof(string) && !Double.TryParse(content, out double parsedValue))
             {
@@ -302,6 +288,18 @@ namespace SS
         {
             return Regex.IsMatch(cellName, "^[a-zA-Z]+\\d+$");
         }
+
+        private object computeCellValue(Cell cell)
+        {
+            if (cell.getCellContent().GetType() == typeof(Formula))
+            {
+                Formula f = (Formula)cell.getCellContent();
+                return f.Evaluate(s =>(double) GetCellValue(s));
+            }
+            return cell.getValue();
+        }
+
+        
 
 
         /// <summary>
@@ -382,22 +380,6 @@ namespace SS
             /// Intentionally Commented :
             /// Leaving it blank as this assignment does not need the value of the cell
             /// </summary>
-
-            private object computeCellValue()
-            {
-                if (cellContent.GetType() == typeof(Double))
-                    return cellValue;
-                else if (cellContent.GetType() == typeof(string))
-                    return cellValue;
-
-                return cellValue;
-            }
-
-            /// <summary>
-            /// 
-            /// Intentionally Commented :
-            /// Leaving it blank as this assignment does not need the value of the cell
-            /// </summary>
             public object getValue()
             {
                 return this.cellValue;
@@ -405,11 +387,6 @@ namespace SS
 
             public void setCellValue(object value)
             {
-                if (value.GetType() == typeof(Formula))
-                {
-                    Formula formula = (Formula)value;
-                    //cellValue = formula.Evaluate((formula.GetVariables()));
-                }
                 cellValue = value;
             }
         }
