@@ -24,14 +24,30 @@ namespace SS
         // Dependency Graph to store connections between cells
         private DependencyGraph cellDependency;
         private Dictionary<string, Cell> nonEmptyCells;
+        private bool changed;
 
-        public Spreadsheet()
+        public Spreadsheet() : base(s => true,s=>s,"default")
+        {
+
+            cellDependency = new();
+            this.nonEmptyCells = new();
+            changed = false;
+        }
+
+        public Spreadsheet(Func<string, bool> isValid, Func<string, string> normalize, string version) : base(isValid, normalize, version)
         {
             cellDependency = new();
             nonEmptyCells = new();
         }
 
-        public override bool Changed { get => throw new NotImplementedException(); protected set => throw new NotImplementedException(); }
+        public Spreadsheet(string filePath, Func<string, bool> isValid, Func<string, string> normalize, string version) : base(isValid, normalize, version)
+        {
+            string path = filePath;
+            cellDependency = new();
+            nonEmptyCells = new();
+        }
+
+        public override bool Changed { get =>changed ; protected set => changed=true; }
 
         /// <summary>
         ///  Given a cell name returns the contents in it
@@ -54,7 +70,11 @@ namespace SS
 
         public override object GetCellValue(string name)
         {
-            throw new NotImplementedException();
+
+            string normalisedCellName = Normalize(name);
+            if (!validateCellName(normalisedCellName) || validateCellName(normalisedCellName) && !IsValid(normalisedCellName))
+                throw new InvalidNameException();
+            return nonEmptyCells[normalisedCellName].getValue();
         }
 
         /// <summary>
@@ -63,15 +83,7 @@ namespace SS
         /// <returns></returns> Enumerable of all the names of cells that are having non-Empty cell Contents
         public override IEnumerable<string> GetNamesOfAllNonemptyCells()
         {
-            HashSet<string> nonEmptyCellNames = new();
-            // checks if dictionary to store non-empty cells is non empty to ensure spreadsheet has non-empty cells
-            if (nonEmptyCells.Count != 0)
-                /// gets all the nonEmpty cellNames which are keys in this dictionary and checks if their
-                /// content is empty and if so stores the cellNames in the HashSet otherwise returns an empty Set
-                foreach (string cellName in nonEmptyCells.Keys)
-                    if (!nonEmptyCells[cellName].getCellContent().Equals(""))
-                        nonEmptyCellNames.Add(cellName);
-            return nonEmptyCellNames;
+            return nonEmptyCells.Keys;
         }
 
         public override string GetSavedVersion(string filename)
@@ -98,8 +110,9 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception> Throws an exception if cellName is invalid or null
         public override ISet<string> SetCellContents(string name, double number)
         {
+            string normalisedCellName = Normalize(name);
             // if CellName is null or Invalid throws an exception
-            if (name == null || !validateCellName(name))
+            if (normalisedCellName == null || !validateCellName(normalisedCellName) || validateCellName(normalisedCellName) && IsValid(normalisedCellName))
                 throw new InvalidNameException();
 
             cellDependency.ReplaceDependees(name, new HashSet<string>());
@@ -215,13 +228,13 @@ namespace SS
         }
 
         /// <summary>
-        ///  Checks if cellName is valid or not
+        ///  Checks if cellName is valid or not according to the new convention
         /// </summary>
         /// <param name="cellName"></param> CellName that is to be validated
         /// <returns></returns> true if valid name or false
         private bool validateCellName(string cellName)
         {
-            return Regex.IsMatch(cellName, @"^[a-zA-Z_][a-zA-Z0-9_]*$");
+            return Regex.IsMatch(cellName, "^[a - zA - Z] +\\d +$");
         }
 
 
@@ -241,7 +254,7 @@ namespace SS
         {
             private string cellName;// stores cellName
             private object cellContent;// stores CellCOntent
-            private double cellValue;// stores cellValue
+            private object cellValue;// stores cellValue
 
             /// <summary>
             ///  Constructor for taking in string type cellContent
@@ -252,6 +265,7 @@ namespace SS
             {
                 this.cellName = cellName;
                 this.cellContent = cellContent;
+                this.cellValue = cellContent;
             }
 
             /// <summary>
@@ -275,7 +289,6 @@ namespace SS
 
             public Cell(string cellName, Formula cellContent)
             {
-                this.cellName = cellName;
                 this.cellName = cellName;
                 this.cellContent = cellContent;
             }
@@ -304,10 +317,12 @@ namespace SS
             /// Leaving it blank as this assignment does not need the value of the cell
             /// </summary>
 
-            private double computeCellValue()
+            private object computeCellValue()
             {
                 if (cellContent.GetType() == typeof(Double))
-                    this.cellValue = (Double)cellContent;
+                    return cellValue;
+                else if (cellContent.GetType() == typeof(string))
+                    return cellValue;
                 return cellValue;
             }
 
@@ -321,7 +336,7 @@ namespace SS
                 return this.cellValue;
             }
         }
-
+        
     }
 
 }
