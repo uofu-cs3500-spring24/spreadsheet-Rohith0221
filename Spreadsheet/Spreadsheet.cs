@@ -209,7 +209,12 @@ namespace SS
             }
             catch(CircularException)
             {
-                
+                if (previousCell == null)
+                {
+                    nonEmptyCells.Remove(name);
+                    cellDependency.ReplaceDependees(name, new HashSet<string>());
+                    throw new CircularException();
+                }
                 cellDependency.ReplaceDependees(name, oldDependees);
                 nonEmptyCells[name] = previousCell;
                 throw new CircularException();
