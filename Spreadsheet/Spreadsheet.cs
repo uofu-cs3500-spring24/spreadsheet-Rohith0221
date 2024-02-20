@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -95,13 +96,30 @@ namespace SS
         {
             try
             {
+                // Load the XML document
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.Load(filename);
 
+                // Select the 'spreadsheet' element
+                XmlNode spreadsheetNode = xmlDoc.SelectSingleNode("/spreadsheet");
+
+                // Check if the 'spreadsheet' element exists
+                if (spreadsheetNode != null)
+                {
+                    // Get the value of the 'version' attribute
+                    XmlAttribute versionAttribute = spreadsheetNode.Attributes["version"];
+                    if (versionAttribute != null)
+                    {
+                        return versionAttribute.Value;
+                    }
+                    throw new SpreadsheetReadWriteException(" Version info not found ");
+                }
+                throw new SpreadsheetReadWriteException(" Version info not found ");
             }
             catch (Exception)
             {
-                throw new SpreadsheetReadWriteException(" Unable to open the given file ");
+                throw new SpreadsheetReadWriteException(" Unable to read the given file ");
             }
-            throw new NotImplementedException();
         }
 
         public override string GetXML()
@@ -123,7 +141,7 @@ namespace SS
 
                     // Write the <spreadsheet> element with the version attribute
                     writer.WriteStartElement("spreadsheet");
-                    writer.WriteAttributeString("spreadsheet"+"version", Version);
+                    writer.WriteAttributeString("version", Version);
 
                     foreach (string cellName in GetNamesOfAllNonemptyCells())
                     {
@@ -190,7 +208,7 @@ namespace SS
                 {
                     writer.WriteStartDocument();
                     writer.WriteStartElement("spreadsheet");
-                    writer.WriteAttributeString("spreadsheet"+"version",Version);
+                    writer.WriteAttributeString("version",Version);
 
                     foreach (var cellName in GetNamesOfAllNonemptyCells())
                     {

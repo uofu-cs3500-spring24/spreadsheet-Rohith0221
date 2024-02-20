@@ -352,4 +352,11 @@ public class UnitTest1
         s.SetContentsOfCell("A2", "=A1-1.0");
         Console.WriteLine(s.GetXML());
     }
+
+    [TestMethod]
+    public void getSavedVersion()
+    {
+        Spreadsheet s = new();
+        Assert.AreEqual("1.0", s.GetSavedVersion("testSave.xml"));
+    }
 }
