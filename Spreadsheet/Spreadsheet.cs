@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml;
 using SpreadsheetUtilities;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -7,6 +9,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SS
 {
+
     /// <summary>
     /// Author      : Rohith Veeramachaneni
     /// Partner     : None
@@ -46,9 +49,10 @@ namespace SS
             string path = filePath;
             cellDependency = new();
             nonEmptyCells = new();
+            Version = version;
         }
 
-        public override bool Changed { get =>changed ; protected set => (value)=changed=value; }
+        public override bool Changed { get =>changed ; protected set => value=changed=value; }
 
         /// <summary>
         ///  Given a cell name returns the contents in it
@@ -102,14 +106,149 @@ namespace SS
 
         public override string GetXML()
         {
-            throw new NotImplementedException();
+            try
+            {
+                // Create a StringBuilder to store the XML content
+                StringBuilder xmlBuilder = new StringBuilder();
+
+                // Create an XmlWriterSettings to specify indentation and formatting
+                XmlWriterSettings settings = new XmlWriterSettings();
+                settings.Indent = true;
+                settings.IndentChars = "     "; // Use four spaces for indentation
+
+                // Create an XmlWriter with the StringBuilder and settings
+                using (XmlWriter writer = XmlWriter.Create(xmlBuilder, settings))
+                {
+                    writer.WriteStartDocument();
+
+                    // Write the <spreadsheet> element with the version attribute
+                    writer.WriteStartElement("spreadsheet");
+                    writer.WriteAttributeString("spreadsheet"+"version", Version);
+
+                    foreach (string cellName in GetNamesOfAllNonemptyCells())
+                    {
+                        writer.WriteString("\n");
+                        writer.WriteString("\t \t \t");
+                        writer.WriteStartElement("cell");
+                        writer.WriteString("\n");
+                        writer.WriteString("\t \t \t");
+                        writer.WriteStartElement("name");
+                        writer.WriteString("\n");
+                        writer.WriteString("\t \t \t");
+                        writer.WriteString(cellName);
+                        writer.WriteString("\n");
+                        writer.WriteString("\t \t \t");
+                        writer.WriteEndElement();
+                        writer.WriteString("\n");
+                        writer.WriteString("\t \t \t");
+
+                        writer.WriteStartElement("contents");
+                        writer.WriteString("\n");
+                        writer.WriteString("\t \t \t ");
+
+                        if (GetCellContents(cellName).GetType() == typeof(string))
+
+                            writer.WriteString((string)GetCellContents(cellName));
+                        else if (GetCellContents(cellName).GetType() == typeof(double))
+                        {
+                            double d = (double)GetCellContents(cellName);
+                            writer.WriteString(d.ToString());
+                        }
+                        else if (GetCellContents(cellName).GetType() == typeof(Formula))
+                        {
+                            Formula f = (Formula)GetCellContents(cellName);
+                            writer.WriteString(f.ToString());
+                        }
+                        writer.WriteString("\n");
+                        writer.WriteString("\t \t \t ");
+                        writer.WriteEndElement();
+                        writer.WriteString("\n");
+                        writer.WriteString("\t \t \t");
+                        writer.WriteEndElement(); // Close cell element
+                        writer.WriteString("\n");
+                    }
+
+                    writer.WriteEndElement(); // Close spreadsheet element
+                    writer.WriteEndDocument();
+                }
+
+                // Return the XML content as a string
+                return xmlBuilder.ToString();
+            }
+            catch (Exception ex)
+            {
+                throw new SpreadsheetReadWriteException("Error generating XML representation: " + ex.Message);
+            }
         }
 
         public override void Save(string filename)
         {
-            throw new NotImplementedException();
+            try
+            {
+                Changed = false;
+                using (XmlWriter writer = XmlWriter.Create(filename))
+                {
+                    writer.WriteStartDocument();
+                    writer.WriteStartElement("spreadsheet");
+                    writer.WriteAttributeString("spreadsheet"+"version",Version);
+
+                    foreach (var cellName in GetNamesOfAllNonemptyCells())
+                    {
+                        writer.WriteString("\n");
+                        writer.WriteString("\t \t \t");
+
+                        writer.WriteStartElement("cell");
+                        writer.WriteString("\n");
+                        writer.WriteString("\t \t \t");
+                        writer.WriteStartElement("name");
+                        writer.WriteString("\n");
+                        writer.WriteString("\t \t \t");
+                        writer.WriteString(cellName);
+                        writer.WriteString("\n");
+                        writer.WriteString("\t \t \t");
+                        writer.WriteEndElement();
+                        writer.WriteString("\n");
+                        writer.WriteString("\t \t \t");
+
+                        writer.WriteStartElement("contents");
+                        writer.WriteString("\n");
+                        writer.WriteString("\t \t \t");
+
+                        if (GetCellContents(cellName).GetType()==typeof(string))
+                        
+                            writer.WriteString((string)GetCellContents(cellName));
+                        else if(GetCellContents(cellName).GetType() == typeof(double))
+                        {
+                            double d = (double)GetCellContents(cellName);
+                            writer.WriteString(d.ToString());
+                        }
+                        else if(GetCellContents(cellName).GetType() == typeof(Formula))
+                        {
+                            Formula f = (Formula)GetCellContents(cellName);
+                            writer.WriteString(f.ToString());
+                        }
+                        writer.WriteString("\n");
+                        writer.WriteString("\t \t \t");
+
+                        writer.WriteEndElement();
+                        writer.WriteString("\n");
+                        writer.WriteString("\t \t \t");
+                        writer.WriteEndElement();
+                        writer.WriteString("\n");
+                    }
+                    writer.WriteEndElement();
+                   
+                    writer.WriteEndDocument();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new SpreadsheetReadWriteException("Error writing to the file: " + ex.Message);
+            }
         }
 
+
+        //}
         /// <summary>
         ///  Set the contents of a given cellName to the double number provided
         /// </summary>

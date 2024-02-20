@@ -333,10 +333,23 @@ public class UnitTest1
 
 
 
-    // Writer methods
-
-
-
-
     // Save methods
+    [TestMethod]
+    public void save_constructor2()
+    {
+        Spreadsheet s = new(s => true, s => s.ToUpper(), "1.0");
+        s.SetContentsOfCell("A1", "20.0");
+        s.SetContentsOfCell("A2", "=10.0+A1");
+        s.SetContentsOfCell("A3", "=A2-A1+10.0");
+        s.Save("testSave.xml");
+    }
+
+    [TestMethod]
+    public void getXML()
+    {
+        Spreadsheet s = new();
+        s.SetContentsOfCell("A1", "20.0");
+        s.SetContentsOfCell("A2", "=A1-1.0");
+        Console.WriteLine(s.GetXML());
+    }
 }
