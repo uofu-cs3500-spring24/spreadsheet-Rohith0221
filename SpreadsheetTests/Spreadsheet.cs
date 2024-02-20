@@ -327,9 +327,89 @@ public class UnitTest1
     }
 
     // Recalculation Tests
+    [TestMethod]
+    public void recalculate1()
+    {
+        Spreadsheet s = new();
+        s.SetContentsOfCell("A1", "2.0");
+        s.SetContentsOfCell("A2", "=A1+20.0");
+        s.SetContentsOfCell("A3", "=A2-A1+1.0");
 
+        Assert.AreEqual(2.0, s.GetCellValue("A1"));
+        Assert.AreEqual(22.0, s.GetCellValue("A2"));
+        Assert.AreEqual(21.0, s.GetCellValue("A3"));
+
+        s.SetContentsOfCell("A1", "0.0");
+
+        Assert.AreEqual(0.0, s.GetCellValue("A1"));
+        Assert.AreEqual(20.0, s.GetCellValue("A2"));
+        Assert.AreEqual(21.0, s.GetCellValue("A3"));
+
+    }
+
+    // Recalculation Tests
+    [TestMethod]
+    public void recalculate2()
+    {
+        Spreadsheet s = new();
+        s.SetContentsOfCell("A1", "=2/0.0");
+        s.SetContentsOfCell("A2", "=A1+20.0");
+        s.SetContentsOfCell("A3", "=A2-A1+1.0");
+
+        Assert.IsInstanceOfType(s.GetCellValue("A1"), new FormulaError().GetType());
+        Assert.IsInstanceOfType(s.GetCellValue("A2"),new FormulaError().GetType());
+        Assert.IsInstanceOfType(s.GetCellValue("A3"), new FormulaError().GetType());
+
+        /// fixing recalculation
+        /// 
+        s.SetContentsOfCell("A1", "0.0");
+
+        Assert.AreEqual(0.0, s.GetCellValue("A1"));
+        Assert.AreEqual(20.0, s.GetCellValue("A2"));
+        Assert.AreEqual(21.0, s.GetCellValue("A3"));
+    }
 
     // Exception cases
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void exception_SetContentsOfCell()
+    {
+        Spreadsheet s = new();
+        s.SetContentsOfCell("1", "1.0");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(CircularException))]
+    public void exception_Circular_SetContentsOfCell()
+    {
+        Spreadsheet s = new();
+        s.SetContentsOfCell("A1","1.0");
+        s.SetContentsOfCell("A2", "=A2");
+    }
+
+    [TestMethod]
+    public void differenceBetween_FormulasAndString()
+    {
+        Spreadsheet s = new();
+        s.SetContentsOfCell("A1", "A1");
+        s.SetContentsOfCell("A2", "=A1");
+
+        Assert.IsFalse(s.GetCellContents("A1").Equals(s.GetCellContents("A2")));
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void SpreadsheetReadWriteException_versionError()
+    {
+        Spreadsheet s = new("testSave.xml", s => true, s => s.ToUpper(), "default");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void SpreadsheetReadWriteException_incorrectFile()
+    {
+        Spreadsheet s = new("testSaveeee.xml", s => true, s => s.ToUpper(), "1.0");
+    }
 
 
 
@@ -343,6 +423,29 @@ public class UnitTest1
         s.SetContentsOfCell("A3", "=A2-A1+10.0");
         s.Save("testSave.xml");
     }
+
+    [TestMethod]
+    public void save_constructor3()
+    {
+        Spreadsheet s = new(s => true, s => s.ToUpper(), "1.0");
+        s.SetContentsOfCell("A1", "20.0");
+        s.SetContentsOfCell("A2", "=10.5+A1");
+        s.SetContentsOfCell("A3", "=A2-A1+11.2");
+        s.Save("testSave1.xml");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void save_constructor4()
+    {
+        Spreadsheet s = new(s => true, s => s.ToUpper(), "1.0");
+        s.SetContentsOfCell("A@1", "20.0");
+        s.SetContentsOfCell("A2", "=10.5+A1");
+        s.SetContentsOfCell("A3", "=A2-A1+11.2");
+        s.Save("testSave1.xml");
+    }
+
+
 
     [TestMethod]
     public void getXML()
@@ -359,4 +462,54 @@ public class UnitTest1
         Spreadsheet s = new();
         Assert.AreEqual("1.0", s.GetSavedVersion("testSave.xml"));
     }
+
+    [TestMethod]
+    public void save2()
+    {
+        Spreadsheet s = new();
+        
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void exception_GetSavedFile()
+    {
+        Spreadsheet s = new();
+        s.GetSavedVersion("1.xml");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void exception_Save()
+    {
+        Spreadsheet s = new();
+        s.Save("");
+    }
+
+    [TestMethod]
+    public void testConstructor4()
+    {
+        Spreadsheet s = new("testSave.xml", s => true, s => s.ToUpper(), "1.0");
+        foreach(string cell in s.GetNamesOfAllNonemptyCells())
+        {
+            Console.WriteLine(s.GetCellContents(cell) + " "+s.GetCellValue(cell));
+        }
+    }
+
+    [TestMethod]
+    public void testConstructor4_doubleValues()
+    {
+        save_constructor3();
+        Spreadsheet s = new("testSave1.xml", s => true, s => s.ToUpper(), "1.0");
+        Assert.AreEqual(3, s.GetNamesOfAllNonemptyCells().Count());
+
+        Assert.AreEqual(20.0, s.GetCellContents("A1"));
+        Assert.AreEqual(new Formula("=10.5+A1"), s.GetCellContents("A2"));
+        Assert.AreEqual(new Formula("=A2-A1+11.2"), s.GetCellContents("A3"));
+
+        Assert.AreEqual(20.0, s.GetCellValue("A1"));
+        Assert.AreEqual(30.5, s.GetCellValue("A2"));
+        Assert.AreEqual(21.7, s.GetCellValue("A3"));
+    }
+
 }

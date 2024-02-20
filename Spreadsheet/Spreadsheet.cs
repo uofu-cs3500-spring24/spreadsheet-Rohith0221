@@ -51,6 +51,8 @@ namespace SS
             cellDependency = new();
             nonEmptyCells = new();
             Version = version;
+            //readFile(path);
+            LoadFromFile(path);
         }
 
         public override bool Changed { get =>changed ; protected set => value=changed=value; }
@@ -188,6 +190,7 @@ namespace SS
 
                     writer.WriteEndElement(); // Close spreadsheet element
                     writer.WriteEndDocument();
+                    writer.Dispose();
                 }
 
                 // Return the XML content as a string
@@ -257,6 +260,7 @@ namespace SS
                     writer.WriteEndElement();
                    
                     writer.WriteEndDocument();
+                    writer.Dispose();
                 }
             }
             catch (Exception ex)
@@ -265,6 +269,57 @@ namespace SS
             }
         }
 
+        private void LoadFromFile(string filePath)
+        {
+            string versionNumberReadFromFile=GetSavedVersion(filePath);
+            try
+            {
+                // Check if the file exists
+                if (!File.Exists(filePath))
+                {
+                    throw new FileNotFoundException("File not found.", filePath);
+                }
+
+                if(!Version.Equals(versionNumberReadFromFile))
+                {
+                    throw new SpreadsheetReadWriteException("Version Mismatch");
+                }
+
+
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.Load(filePath);
+
+                XmlNodeList cellNodes = xmlDoc.SelectNodes("//cell");
+                foreach (XmlNode cellNode in cellNodes)
+                {
+                    XmlNode nameNode = cellNode.SelectSingleNode("name");
+                    XmlNode contentsNode = cellNode.SelectSingleNode("contents");
+
+                    if (nameNode != null && contentsNode != null)
+                    {
+                        string cellName = nameNode.InnerText.Trim();
+                        string cellContents = contentsNode.InnerText.Trim();
+
+                        SetContentsOfCell(cellName, cellContents);
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                if (e.GetType() == typeof(FileNotFoundException))
+                    throw new SpreadsheetReadWriteException($"Unable to find the file {filePath} ! Please check the path and fileName once again ");
+                else if (e.GetType() == typeof(SpreadsheetReadWriteException) && e.Message.Equals("Version Mismatch"))
+                    throw new SpreadsheetReadWriteException($" Version mismatch found, Given version is {Version} but version in file is {versionNumberReadFromFile} ");
+                else if (e.GetType() == typeof(InvalidNameException))
+                    throw new SpreadsheetReadWriteException(" Invalid cellName found ");
+                else if(e.GetType() == typeof(FormulaFormatException))
+                    throw new SpreadsheetReadWriteException(" Incorrect fomrula found ");
+                else if(e.GetType() == typeof(CircularException))
+                    throw new SpreadsheetReadWriteException(" File is corrupted, not able to open the file ! ");
+                else
+                    throw new SpreadsheetReadWriteException(" File is corrupted, not able to open the file ! ");
+            }
+        }
 
         //}
         /// <summary>
