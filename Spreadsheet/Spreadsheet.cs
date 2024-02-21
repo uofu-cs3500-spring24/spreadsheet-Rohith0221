@@ -470,6 +470,9 @@ namespace SS
         /// <exception cref="ArgumentNullException"></exception>
         public override IList<string> SetContentsOfCell(string name, string content)
         {
+            if (content == null)
+                throw new ArgumentNullException();
+
             if (content.Equals(""))
                 return new List<string>();
             string normalisedCellName = Normalize(name);
@@ -480,8 +483,6 @@ namespace SS
             if (!validateCellName(normalisedCellName) || !IsValid(normalisedCellName) || (validateCellName(normalisedCellName) && !IsValid(normalisedCellName)))
                 throw new InvalidNameException();
 
-            if (content == null)
-                throw new ArgumentNullException();
 
             if (Double.TryParse(content, out double result))
             {

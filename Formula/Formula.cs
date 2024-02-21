@@ -558,7 +558,6 @@ namespace SpreadsheetUtilities
 
             for (int i = 0; i < tokensToBeValidated.Count(); i++)
             {
-                int startTokenIndex = 0;
                 // Error from isValid delegate with given token
                 if (validateIsVariable(tokensToBeValidated[i]) &&!isValid(tokensToBeValidated[i]))
                     throw new FormulaFormatException($" isValid delegate found an error with {tokensToBeValidated[i]} ");
@@ -566,7 +565,7 @@ namespace SpreadsheetUtilities
                     opening_bracesCount += 1;
                 if (tokensToBeValidated[i].Equals(")"))
                     closing_bracesCount += 1;
-                if (tokensToBeValidated[0].Equals("="))
+                if (i==0 && tokensToBeValidated[0].Equals("="))
                     continue;
 
                 // Rule 1 :checks if the parsed token is any of these,if not throws exception

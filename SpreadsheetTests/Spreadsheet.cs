@@ -450,6 +450,14 @@ public class UnitTest1
         s.GetSavedVersion("testSave1_withoutVersionAtribute.xml");
     }
 
+    [TestMethod]
+    [ExpectedException(typeof(ArgumentNullException))]
+    public void nullINputContent()
+    {
+        Spreadsheet s = new();
+        s.SetContentsOfCell("a1", null);
+    }
+
 
     // Save methods
     [TestMethod]
@@ -555,5 +563,56 @@ public class UnitTest1
         Assert.AreEqual(21.7, s.GetCellValue("A3"));
     }
 
+
+    [TestMethod]
+    public void normaliseCheck()
+    {
+        Spreadsheet s = new(s => true, s => s.ToUpper(), "");
+        s.SetContentsOfCell("a1", "20.0");
+        Assert.AreEqual(1, s.GetNamesOfAllNonemptyCells().Count());
+        IEnumerator<string> enumerator = s.GetNamesOfAllNonemptyCells().GetEnumerator();
+        enumerator.MoveNext();
+        Assert.AreEqual("A1", enumerator.Current.ToString());
+    }
+
+    [TestMethod]
+    public void getXML_stringContent()
+    {
+        Spreadsheet s = new();
+        s.SetContentsOfCell("A1", "20.0");
+        s.SetContentsOfCell("A2", "A2");
+
+        Console.WriteLine(s.GetXML());
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void loadingFromFile_circularDependency()
+    {
+        Spreadsheet s = new("testSave1_circular.xml", s => true, s => s, "1.0");
+
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void loadingFromFile_incorrectCellName()
+    {
+        Spreadsheet s = new("testSave_incorrectCellName.xml", s => true, s => s, "1.0");
+
+    }
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void loadingFromFile_incorrectFormula()
+    {
+        Spreadsheet s = new("testSave_incorrectFormula.xml", s => true, s => s, "1.0");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void enteringIncorrectFormula()
+    {
+        Spreadsheet s = new();
+        s.SetContentsOfCell("A1", "=A2$1.0");
+    }
 
 }
