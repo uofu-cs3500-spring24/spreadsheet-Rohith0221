@@ -170,7 +170,7 @@ namespace SS
         /// </summary>
         /// 
         /// <exception cref="InvalidNameException"> 
-        ///   Thrown if the name is null or invalid
+        ///   Thrown if the name is invalid: blank/empty/""
         /// </exception>
         /// 
         /// <param name="name">The name of the spreadsheet cell to query</param>

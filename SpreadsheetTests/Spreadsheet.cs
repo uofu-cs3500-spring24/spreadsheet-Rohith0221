@@ -168,30 +168,6 @@ public class UnitTest1
         Assert.AreEqual("", spreadsheet.GetCellContents("A1"));
     }
 
-
-    //[TestMethod()]
-    //public void hugeData_StressTest()
-    //{
-    //    Spreadsheet s = new Spreadsheet();
-    //    s.SetContentsOfCell("A1","=B1+B2");
-    //    s.SetContentsOfCell("B1","=C1-C2");
-    //    s.SetContentsOfCell("B2", "=C3*C4");
-    //    s.SetContentsOfCell("C1", "=D1*D2");
-    //    s.SetContentsOfCell("C2", "=D3*D4");
-    //    s.SetContentsOfCell("C3", "=D5*D6");
-    //    s.SetContentsOfCell("C4", "=D7*D8");
-    //    s.SetContentsOfCell("D1", "=E10");
-    //    s.SetContentsOfCell("D2", "=E10");
-    //    s.SetContentsOfCell("D3", "=E10");
-    //    s.SetContentsOfCell("D4", "=E10");
-    //    s.SetContentsOfCell("D5", "=E10");
-    //    s.SetContentsOfCell("D6", "=E10");
-    //    s.SetContentsOfCell("D7", "=E10");
-    //    s.SetContentsOfCell("D8", "=E10");
-    //    IList<String> cells = s.SetContentsOfCell("E10", "0");
-    //    Assert.IsTrue(new List<string>() { "A1", "B1", "B2", "C1", "C2", "C3", "C4", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "E10" }.Equals(cells));
-    //}
-
     [TestMethod]
     public void testDoubleValue()
     {
@@ -411,6 +387,68 @@ public class UnitTest1
         Spreadsheet s = new("testSaveeee.xml", s => true, s => s.ToUpper(), "1.0");
     }
 
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void constructor4_readingFileError()
+    {
+        Spreadsheet s = new(".xml", s => true, s => s, "1.0");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void getCellValue_invalidCellName()
+    {
+        Spreadsheet s = new();
+        s.GetCellContents("AA");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void getCellValue_emptyCellName()
+    {
+        Spreadsheet s = new();
+        s.GetCellContents("");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void GetCellValue_invalidCellNameByDelegate()
+    {
+        Spreadsheet s = new(s => { if (s.StartsWith("A")) return false; return true; },s=>s,"");
+        s.GetCellValue("A1");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void getCellContent_invalidCellNameByDelegate()
+    {
+        Spreadsheet s = new(s => { if (s.StartsWith("A")) return false; return true; }, s => s, "");
+        s.GetCellContents("A1");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void readNonExistentFile()
+    {
+        Spreadsheet s = new(".xml", s => true, s => s, "1.0");
+
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void getSavedVersion_fileWithoutSpreadsheetTag()
+    {
+        Spreadsheet s = new();
+        s.GetSavedVersion("testSave_WithoutSpreadsheetTag.xml");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void getSavedVersion_fileWithoutVersionAttribute()
+    {
+        Spreadsheet s = new();
+        s.GetSavedVersion("testSave1_withoutVersionAtribute.xml");
+    }
 
 
     // Save methods
@@ -445,8 +483,6 @@ public class UnitTest1
         s.Save("testSave1.xml");
     }
 
-
-
     [TestMethod]
     public void getXML()
     {
@@ -464,10 +500,17 @@ public class UnitTest1
     }
 
     [TestMethod]
-    public void save2()
+    public void save_emptySpreadsheet()
     {
         Spreadsheet s = new();
-        
+        s.Save("empty.xml");
+    }
+
+    [TestMethod]
+    public void loadingEmptyCellsFile()
+    {
+        save_emptySpreadsheet();
+        Spreadsheet s = new("empty.xml", s => true, s => s.ToUpper(), "default");
     }
 
     [TestMethod]
@@ -511,5 +554,6 @@ public class UnitTest1
         Assert.AreEqual(30.5, s.GetCellValue("A2"));
         Assert.AreEqual(21.7, s.GetCellValue("A3"));
     }
+
 
 }

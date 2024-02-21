@@ -30,7 +30,7 @@ namespace SS
         private Dictionary<string, Cell> nonEmptyCells;
         private bool changed;
 
-        public Spreadsheet() : base(s => true,s=>s,"default")
+        public Spreadsheet() : base(s => true, s => s, "default")
         {
 
             cellDependency = new();
@@ -51,11 +51,10 @@ namespace SS
             cellDependency = new();
             nonEmptyCells = new();
             Version = version;
-            //readFile(path);
             LoadFromFile(path);
         }
 
-        public override bool Changed { get =>changed ; protected set => value=changed=value; }
+        public override bool Changed { get => changed; protected set => value = changed = value; }
 
         /// <summary>
         ///  Given a cell name returns the contents in it
@@ -63,16 +62,17 @@ namespace SS
         /// <param name="name"></param> Cell name in the current spreadsheet
         /// <returns></returns> Contents in it maybe either Formula object,String or double
         /// <exception cref="InvalidNameException"></exception> Throws this exception if given cell name is invalid according to the rules
-        /// or if name is nukk
+        /// or if name is null
         public override object GetCellContents(string name)
         {
+            string normalisedCellName = Normalize(name);
             // If name is invalid or null throws an exception
-            if (name == null || !validateCellName(name))
+            if (normalisedCellName == null || !validateCellName(normalisedCellName) || normalisedCellName.Equals("") ||!IsValid(normalisedCellName))
                 throw new InvalidNameException();
 
             // If spreadsheet contains this cell already filled with content returns the content in it otherwise returns an empty string
-            if (nonEmptyCells.ContainsKey(name))
-                return nonEmptyCells[name].getCellContent();
+            if (nonEmptyCells.ContainsKey(normalisedCellName))
+                return nonEmptyCells[normalisedCellName].getCellContent();
             return "";
         }
 
@@ -80,7 +80,7 @@ namespace SS
         {
 
             string normalisedCellName = Normalize(name);
-            if (!validateCellName(normalisedCellName) || validateCellName(normalisedCellName) && !IsValid(normalisedCellName))
+            if (!validateCellName(normalisedCellName) || !IsValid(normalisedCellName) || (!validateCellName(normalisedCellName) && IsValid(normalisedCellName)))
                 throw new InvalidNameException();
             return nonEmptyCells[normalisedCellName].getValue();
         }
@@ -106,16 +106,12 @@ namespace SS
                 XmlNode spreadsheetNode = xmlDoc.SelectSingleNode("/spreadsheet");
 
                 // Check if the 'spreadsheet' element exists
-                if (spreadsheetNode != null)
-                {
                     // Get the value of the 'version' attribute
-                    XmlAttribute versionAttribute = spreadsheetNode.Attributes["version"];
-                    if (versionAttribute != null)
+                XmlAttribute versionAttribute = spreadsheetNode.Attributes["version"];
+                if (versionAttribute != null)
                     {
-                        return versionAttribute.Value;
+                       return versionAttribute.Value;
                     }
-                    throw new SpreadsheetReadWriteException(" Version info not found ");
-                }
                 throw new SpreadsheetReadWriteException(" Version info not found ");
             }
             catch (Exception)
@@ -211,7 +207,7 @@ namespace SS
                 {
                     writer.WriteStartDocument();
                     writer.WriteStartElement("spreadsheet");
-                    writer.WriteAttributeString("version",Version);
+                    writer.WriteAttributeString("version", Version);
 
                     foreach (var cellName in GetNamesOfAllNonemptyCells())
                     {
@@ -235,15 +231,15 @@ namespace SS
                         writer.WriteString("\n");
                         writer.WriteString("\t \t \t");
 
-                        if (GetCellContents(cellName).GetType()==typeof(string))
-                        
+                        if (GetCellContents(cellName).GetType() == typeof(string))
+
                             writer.WriteString((string)GetCellContents(cellName));
-                        else if(GetCellContents(cellName).GetType() == typeof(double))
+                        else if (GetCellContents(cellName).GetType() == typeof(double))
                         {
                             double d = (double)GetCellContents(cellName);
                             writer.WriteString(d.ToString());
                         }
-                        else if(GetCellContents(cellName).GetType() == typeof(Formula))
+                        else if (GetCellContents(cellName).GetType() == typeof(Formula))
                         {
                             Formula f = (Formula)GetCellContents(cellName);
                             writer.WriteString(f.ToString());
@@ -258,7 +254,7 @@ namespace SS
                         writer.WriteString("\n");
                     }
                     writer.WriteEndElement();
-                   
+
                     writer.WriteEndDocument();
                     writer.Dispose();
                 }
@@ -271,7 +267,7 @@ namespace SS
 
         private void LoadFromFile(string filePath)
         {
-            string versionNumberReadFromFile=GetSavedVersion(filePath);
+            string versionNumberReadFromFile=null;
             try
             {
                 // Check if the file exists
@@ -280,7 +276,9 @@ namespace SS
                     throw new FileNotFoundException("File not found.", filePath);
                 }
 
-                if(!Version.Equals(versionNumberReadFromFile))
+                versionNumberReadFromFile = GetSavedVersion(filePath);
+
+                if (!Version.Equals(versionNumberReadFromFile))
                 {
                     throw new SpreadsheetReadWriteException("Version Mismatch");
                 }
@@ -304,7 +302,7 @@ namespace SS
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 if (e.GetType() == typeof(FileNotFoundException))
                     throw new SpreadsheetReadWriteException($"Unable to find the file {filePath} ! Please check the path and fileName once again ");
@@ -312,29 +310,24 @@ namespace SS
                     throw new SpreadsheetReadWriteException($" Version mismatch found, Given version is {Version} but version in file is {versionNumberReadFromFile} ");
                 else if (e.GetType() == typeof(InvalidNameException))
                     throw new SpreadsheetReadWriteException(" Invalid cellName found ");
-                else if(e.GetType() == typeof(FormulaFormatException))
+                else if (e.GetType() == typeof(FormulaFormatException))
                     throw new SpreadsheetReadWriteException(" Incorrect fomrula found ");
-                else if(e.GetType() == typeof(CircularException))
+                else if (e.GetType() == typeof(CircularException))
                     throw new SpreadsheetReadWriteException(" File is corrupted, not able to open the file ! ");
                 else
                     throw new SpreadsheetReadWriteException(" File is corrupted, not able to open the file ! ");
             }
         }
 
-        //}
         /// <summary>
         ///  Set the contents of a given cellName to the double number provided
         /// </summary>
         /// <param name="name"></param> Name of the cell for which contents if exisiting is to be overwritten
         /// <param name="number"></param> The number to which content of the given cell name is to be changed
         /// <returns></returns> A Set consisting of all the cells dependent on the given cellName
-        /// <exception cref="InvalidNameException"></exception> Throws an exception if cellName is invalid or null
         protected override IList<string> SetCellContents(string name, double number)
         {
             string normalisedCellName = Normalize(name);
-            // if CellName is null or Invalid throws an exception
-            if (normalisedCellName == null || !validateCellName(normalisedCellName) || validateCellName(normalisedCellName) && !IsValid(normalisedCellName))
-                throw new InvalidNameException();
 
             cellDependency.ReplaceDependees(normalisedCellName, new HashSet<string>());
             // Gets all the dependents by calling GetCellsToRecalculate method defined in Abstract class
@@ -352,7 +345,7 @@ namespace SS
                 Cell cell = new(normalisedCellName, number);
                 cell.setCellValue(number);
                 nonEmptyCells.Add(normalisedCellName, cell);
-                
+
             }
 
             foreach (string dependent in dependents)
@@ -371,19 +364,10 @@ namespace SS
         /// <param name="name"></param> Name of the cell for which contents if exisiting is to be overwritten
         /// <param name="text"></param> The text to which content of the given cell name is to be changed
         /// <returns></returns> A Set consisting of all the cells dependent on the given cellName
-        /// <exception cref="InvalidNameException"></exception> Throws an exception if cellName is invalid or null
-        /// <exception cref="ArgumentNullException"></exception> Throws an exception if text is null
 
         protected override IList<string> SetCellContents(string name, string text)
         {
             string normalisedCellName = Normalize(name);
-            // if CellName is null or Invalid throws an exception
-            if (normalisedCellName == null || !validateCellName(normalisedCellName) || validateCellName(normalisedCellName) && !IsValid(normalisedCellName))
-                throw new InvalidNameException();
-            // if given text is null throws an exception
-            else if (text == null)
-                throw new ArgumentNullException();
-
             cellDependency.ReplaceDependees(normalisedCellName, new HashSet<string>());
 
             // Gets all the dependents by calling GetCellsToRecalculate method defined in Abstract class
@@ -418,20 +402,12 @@ namespace SS
         /// <param name="name"></param> Name of the cell for which contents if exisiting is to be overwritten
         /// <param name="text"></param> The text to which content of the given cell name is to be changed
         /// <returns></returns> A Set consisting of all the cells dependent on the given cellName
-        /// <exception cref="InvalidNameException"></exception> Throws an exception if cellName is invalid or null
-        /// <exception cref="ArgumentNullException"></exception> Throws an exception if text is null
         /// <exception cref="CircularException"></exception> Throws an exception if formula is having the cellName either directly or indirectly
 
         protected override IList<string> SetCellContents(string name, Formula formula)
         {
             List<string> dependents;
-            Cell previousCell = null ;
-            if (formula is null)
-                throw new ArgumentNullException();
-
-            // if CellName is null or Invalid throws an exception
-            else if (name == null || !validateCellName(name) || validateCellName(name) && !IsValid(name))
-                throw new InvalidNameException();
+            Cell previousCell = null;
 
             if (nonEmptyCells.ContainsKey(name))
                 previousCell = nonEmptyCells[name];
@@ -445,7 +421,7 @@ namespace SS
                 // Recalculates cells if needed and returns dependents of the cell
                 dependents = GetCellsToRecalculate(name).ToList();
             }
-            catch(CircularException)
+            catch (CircularException)
             {
                 if (previousCell == null)
                 {
@@ -456,7 +432,7 @@ namespace SS
                 }
                 cellDependency.ReplaceDependees(name, oldDependees);
                 nonEmptyCells[name] = previousCell;
-                Changed=false;
+                Changed = false;
                 throw new CircularException();
             }
 
@@ -464,7 +440,7 @@ namespace SS
             if (nonEmptyCells.ContainsKey(name))
             {
                 nonEmptyCells[name].setCellContent(formula);
-                 nonEmptyCells[name].setCellValue(computeCellValue(nonEmptyCells[name]));
+                nonEmptyCells[name].setCellValue(computeCellValue(nonEmptyCells[name]));
             }
             // If dictionary doesn't contain the cellName ,Creates a new entry of the cellName and the cell
             else
@@ -484,25 +460,38 @@ namespace SS
             return dependents;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidNameException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
         public override IList<string> SetContentsOfCell(string name, string content)
         {
             if (content.Equals(""))
                 return new List<string>();
             string normalisedCellName = Normalize(name);
-            object previousCellContents=null;
+            object previousCellContents = null;
+
             if (nonEmptyCells.ContainsKey(normalisedCellName))
                 previousCellContents = nonEmptyCells[normalisedCellName].getCellContent();
-            if (!validateCellName(normalisedCellName) ||!IsValid(normalisedCellName)|| (validateCellName(normalisedCellName) && !IsValid(normalisedCellName)))
+            if (!validateCellName(normalisedCellName) || !IsValid(normalisedCellName) || (validateCellName(normalisedCellName) && !IsValid(normalisedCellName)))
                 throw new InvalidNameException();
+
+            if (content == null)
+                throw new ArgumentNullException();
+
             if (Double.TryParse(content, out double result))
             {
                 Changed = true;
-                return SetCellContents(name, result); ;
+                return SetCellContents(normalisedCellName, result); ;
             }
             else if (content.StartsWith("="))
             {
-                    Changed = true;
-                    return SetCellContents(normalisedCellName,new Formula(content, s => s, s => { return Regex.IsMatch(s, "^[a-zA-Z]+\\d+$"); }));
+                Changed = true;
+                return SetCellContents(normalisedCellName, new Formula(content, s => s, s => { return Regex.IsMatch(s, "^[a-zA-Z]+\\d+$"); }));
             }
             if (!content.StartsWith("=") && content.GetType() == typeof(string) && !Double.TryParse(content, out double parsedValue))
             {
@@ -512,16 +501,32 @@ namespace SS
         }
 
         /// <summary>
-        /// Helper method for GetCellsToRecalculate method that retrieves all the dependents of the given cell
-        /// using cellName
+        /// Returns an enumeration, without duplicates, of the names of all cells whose
+        /// values depend directly on the value of the named cell. 
         /// </summary>
-        /// <param name="name"></param> Name of the cell for which dependents has to be returned
-        /// <returns></returns> List of the dependents of the given cell
-        /// <exception cref="InvalidNameException"></exception> If cellNAme is invalid or null throws an exception
+        /// 
+        /// <required>
+        ///    The name must be valid upon entry to the function.
+        /// </required>
+        /// 
+        /// <param name="name"></param>
+        /// <returns>
+        ///   Returns an enumeration, without duplicates, of the names of all cells that contain
+        ///   formulas containing name.
+        /// 
+        ///   <para>For example, suppose that: </para>
+        ///   <list type="bullet">
+        ///      <item>A1 contains 3</item>
+        ///      <item>B1 contains the formula A1 * A1</item>
+        ///      <item>C1 contains the formula B1 + A1</item>
+        ///      <item>D1 contains the formula B1 - C1</item>
+        ///   </list>
+        /// 
+        ///   <para>The direct dependents of A1 are B1 and C1</para>
+        /// 
+        /// </returns>
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
-            if (name == null || !validateCellName(name))
-                throw new InvalidNameException();
             return cellDependency.GetDependents(name);// GetsDependents for cellName in the cellDependency Graph
         }
 
@@ -537,15 +542,11 @@ namespace SS
 
         private object computeCellValue(Cell cell)
         {
-            if (cell.getCellContent().GetType() == typeof(Formula))
-            {
-                Formula f = (Formula)cell.getCellContent();
-                return f.Evaluate(s =>(double) GetCellValue(s));
-            }
-            return cell.getValue();
+            Formula f = (Formula)cell.getCellContent();
+            return f.Evaluate(s => (double)GetCellValue(s));
         }
 
-        
+
 
 
         /// <summary>
@@ -636,7 +637,7 @@ namespace SS
                 cellValue = value;
             }
         }
-        
+
     }
 
 }
