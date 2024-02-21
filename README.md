@@ -29,5 +29,19 @@ and now evaluates the result in doubles and accepts double type numbers.
 
     4. Assignment Four  :  Predicted Hours:        16        Actual Hours:12-13
 
+    5. Assignment Five  :  Predicted Hours:        16-18     Actual Hours:12-14
+
+# Examples of Good Software Practices:
+
+1. Had old tests from Assignment 4 rather than writing new tests that test out same functionality
+   and fixed the code if any of tests broke
+
+2. Abstraction: Already had a GetCellValue method to return the cell value that is in the cell class
+
+3. DRY: For many methods,when a cell is to be validated against the rules given by the API,the helper method
+   validateCellName validates it without repeating the same lines of code again and again throughout the Spreadsheet project
+
+
+
 
 
