@@ -615,4 +615,54 @@ public class UnitTest1
         s.SetContentsOfCell("A1", "=A2$1.0");
     }
 
+
+    [TestMethod]
+    public void stressTest1_Doubles()
+    {
+        Spreadsheet s = new();
+        for(int i=0;i<100;i++)
+        {
+            s.SetContentsOfCell("A" + i,(i+1*2).ToString());
+        }
+
+        for(int i=0;i<100;i++)
+        {
+            Assert.AreEqual((Double)i + 1 * 2, s.GetCellContents("A" + i));
+            Assert.AreEqual((Double)i + 1 * 2, s.GetCellValue("A" + i));
+        }
+    }
+
+    [TestMethod]
+    public void stressTest1_Strings()
+    {
+        Spreadsheet s = new();
+        for (int i = 0; i < 100; i++)
+        {
+            s.SetContentsOfCell("A" + i, "A"+i + 1 * 2);
+        }
+
+        for (int i = 0; i < 100; i++)
+        {
+            Assert.AreEqual("A" + i + 1 * 2, s.GetCellContents("A" + i));
+            Assert.AreEqual("A" + i + 1 * 2, s.GetCellValue("A" + i));
+        }
+    }
+
+    [TestMethod]
+    public void stressTest1_Formulas()
+    {
+        Spreadsheet s = new();
+        for (int i = 0; i < 100; i++)
+        {
+            s.SetContentsOfCell("A" + i, "=A" + i + 1 * 2);
+        }
+
+        for (int i = 0; i < 100; i++)
+        {
+            Assert.AreEqual(new Formula("=A"+i+1*2), s.GetCellContents("A" + i));
+            Assert.AreEqual("=A" + i + 1 * 2, s.GetCellValue("A" + i));
+        }
+    }
+
+
 }

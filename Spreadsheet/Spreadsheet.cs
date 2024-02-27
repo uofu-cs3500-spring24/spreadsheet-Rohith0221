@@ -111,6 +111,8 @@ namespace SS
             string normalisedCellName = Normalize(name);
             if (!validateCellName(normalisedCellName) || !IsValid(normalisedCellName) || (!validateCellName(normalisedCellName) && IsValid(normalisedCellName)))
                 throw new InvalidNameException();
+            if (GetCellContents(name).Equals(""))
+                return "";
             return nonEmptyCells[normalisedCellName].getValue();
         }
 
@@ -225,7 +227,6 @@ namespace SS
                     writer.WriteStartDocument();
                     writer.WriteStartElement("spreadsheet");
                     writer.WriteAttributeString("version", Version);
-
                     writingFile(writer); // method writes a new file
                 }
             }
