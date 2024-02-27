@@ -565,8 +565,12 @@ namespace SpreadsheetUtilities
                     opening_bracesCount += 1;
                 if (tokensToBeValidated[i].Equals(")"))
                     closing_bracesCount += 1;
-                if (i==0 && tokensToBeValidated[0].Equals("="))
+                if (i == 0 && tokensToBeValidated[0].Equals("="))
+                {
+                    //    tokensToBeValidated.RemoveAt(0);
                     continue;
+                }
+
 
                 // Rule 1 :checks if the parsed token is any of these,if not throws exception
                 if (!checkIfAnyValidToken(tokensToBeValidated[i]))
@@ -632,7 +636,7 @@ namespace SpreadsheetUtilities
         /// <returns></returns> true if a variable or false otherwise
         private Boolean validateIsVariable(string variableToBeChecked)
         {
-            return Regex.IsMatch(variableToBeChecked, @"^[a-zA-Z_][a-zA-Z0-9_]*$");
+            return Regex.IsMatch(variableToBeChecked, "^[a-zA-Z]+\\d+$");
         }
 
         /// <summary>

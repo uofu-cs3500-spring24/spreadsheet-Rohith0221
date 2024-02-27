@@ -305,25 +305,25 @@ namespace SS
         {
             foreach (var cellName in GetNamesOfAllNonemptyCells())
             {
-                writer.WriteString("\n");
-                writer.WriteString("\t \t \t");
+                //writer.WriteString("\n");
+                //writer.WriteString("\t \t \t");
 
                 writer.WriteStartElement("cell"); // writes a cell element with the all attributes of a cell
-                writer.WriteString("\n");
-                writer.WriteString("\t \t \t");
+                //writer.WriteString("\n");
+                //writer.WriteString("\t \t \t");
                 writer.WriteStartElement("name"); // writes a name element with the all name of the cell
-                writer.WriteString("\n"); 
-                writer.WriteString("\t \t \t");
+                //writer.WriteString("\n"); 
+                //writer.WriteString("\t \t \t");
                 writer.WriteString(cellName);
-                writer.WriteString("\n");
-                writer.WriteString("\t \t \t");
+                //writer.WriteString("\n");
+                //writer.WriteString("\t \t \t");
                 writer.WriteEndElement(); // closes the cellName element
-                writer.WriteString("\n");
-                writer.WriteString("\t \t \t");
+                //writer.WriteString("\n");
+                //writer.WriteString("\t \t \t");
 
                 writer.WriteStartElement("contents");// writes a cell content with the contents of a cell
-                writer.WriteString("\n");
-                writer.WriteString("\t \t \t");
+                //writer.WriteString("\n");
+                //writer.WriteString("\t \t \t");
 
                 if (GetCellContents(cellName).GetType() == typeof(string))
 
@@ -338,14 +338,14 @@ namespace SS
                     Formula f = (Formula)GetCellContents(cellName);
                     writer.WriteString(f.ToString());
                 }
-                writer.WriteString("\n");
-                writer.WriteString("\t \t \t");
+                //writer.WriteString("\n");
+                //writer.WriteString("\t \t \t");
 
                 writer.WriteEndElement(); // closes the content element
-                writer.WriteString("\n");
-                writer.WriteString("\t \t \t");
+                //writer.WriteString("\n");
+                //writer.WriteString("\t \t \t");
                 writer.WriteEndElement();// closes the cell element
-                writer.WriteString("\n");
+                //writer.WriteString("\n");
             }
             writer.WriteEndElement();
 
@@ -528,7 +528,7 @@ protected override IList<string> SetCellContents(string name, double number)
             else if (content.StartsWith("="))
             {
                 Changed = true;
-                return SetCellContents(normalisedCellName, new Formula(content, s => s, s => { return Regex.IsMatch(s, "^[a-zA-Z]+\\d+$"); }));
+                return SetCellContents(normalisedCellName, new Formula(content,Normalize,IsValid));
             }
             if (!content.StartsWith("=") && content.GetType() == typeof(string) && !Double.TryParse(content, out double parsedValue))
             {

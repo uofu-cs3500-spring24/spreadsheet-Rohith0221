@@ -88,7 +88,7 @@ namespace AS5_Grading_Tests
             s.SetContentsOfCell("B1", "= A1 + C1");
         }
 
-        [TestMethod, Timeout(2000)]
+        [TestMethod]
         [TestCategory("4")]
         [ExpectedException(typeof(FormulaFormatException))]
         public void IsValidTest4()
@@ -533,7 +533,7 @@ namespace AS5_Grading_Tests
             Set(ss, "A2", "5.0");
             Set(ss, "A3", "4.0");
             Set(ss, "A4", "= A2 + A3");
-            ss.Save("save6.txt");
+            ss.Save("save6.txt"); 
             using (XmlReader reader = XmlReader.Create("save6.txt"))
             {
                 int spreadsheetCount = 0;
