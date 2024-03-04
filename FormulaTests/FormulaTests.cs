@@ -377,4 +377,10 @@ public class UnitTest1
         Formula f = new("2.011*x1");
         Assert.AreEqual(Math.Pow(2.011,2), f.Evaluate(x1=>2.011));
     }
+
+    [TestMethod]
+    public void testDollarFormula()
+    {
+        Formula f = new("");
+    }
 }

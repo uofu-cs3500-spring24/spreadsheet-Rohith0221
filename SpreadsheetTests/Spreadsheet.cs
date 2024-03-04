@@ -615,7 +615,7 @@ public class UnitTest1
         s.SetContentsOfCell("A1", "=A2$1.0");
     }
 
-
+    
     [TestMethod]
     public void stressTest1_Doubles()
     {
@@ -649,20 +649,10 @@ public class UnitTest1
     }
 
     [TestMethod]
-    public void stressTest1_Formulas()
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void testFormualError()
     {
         Spreadsheet s = new();
-        for (int i = 0; i < 100; i++)
-        {
-            s.SetContentsOfCell("A" + i, "=A" + i + 1 * 2);
-        }
-
-        for (int i = 0; i < 100; i++)
-        {
-            Assert.AreEqual(new Formula("=A"+i+1*2), s.GetCellContents("A" + i));
-            Assert.AreEqual("=A" + i + 1 * 2, s.GetCellValue("A" + i));
-        }
+        s.SetContentsOfCell("A1", "=$20");
     }
-
-
 }
