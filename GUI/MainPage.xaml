@@ -15,6 +15,9 @@
             <MenuFlyoutItem Text="Save" Clicked="FileMenuSave"/>
             <MenuFlyoutItem Text="Exit" Clicked="warnOnExit"/>
         </MenuBarItem>
+        <MenuBarItem Text="Help">
+
+         </MenuBarItem>
     </ContentPage.MenuBarItems>
 
     <ScrollView Orientation="Both" HorizontalScrollBarVisibility="Always">
