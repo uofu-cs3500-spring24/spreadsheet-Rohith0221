@@ -30,5 +30,8 @@ Prompt used:
 2. How to write an XML file in this way and pasted the format needed
 
 
+# About the Help Menu:
 
+Help menu in the spreadsheet app explains the user using the app for the first time acting as a tutorial for someone
+who wants to know how to use the spreadsheet
 

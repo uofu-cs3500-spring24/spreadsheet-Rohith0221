@@ -1,5 +1,7 @@
 ﻿using SS;
+using System.Windows.Input;
 using System.Xml.Linq;
+using Microsoft.Maui.Storage;
 
 /// <summary>
 /// Author:    Seongjin Hwang/ Rohith Veeramachaneni
@@ -34,6 +36,9 @@ namespace GUI
         /// </summary>
 
         private Spreadsheet sp;
+        Label blank = new Label();
+        Label blank2 = new Label();
+
 
         /// <summary>
         ///  Default constructor for the app
@@ -43,7 +48,8 @@ namespace GUI
             InitializeComponent();
             CreateTextBoxes();
 
-            sp = new Spreadsheet(s => true, s => s.ToUpper(), "six");// creates a new spreadsheet with version six  
+            sp = new Spreadsheet(s => true, s => s.ToUpper(), "six");// creates a new spreadsheet with version six
+            //CloseWindowCommand=new Command(warnOnExit(this,EventArgs.Empty));
         }
 
         /// <summary>
@@ -53,48 +59,55 @@ namespace GUI
         /// </summary>
         private void CreateTextBoxes()
         {
+            grid.Children.Add(blank);
+            grid.Children.Add(blank2);
+            Grid.SetRow(blank, 0);
+            Grid.SetRow(blank2, 1);
+            Grid.SetColumn(blank, 2);
+            Grid.SetColumn(blank2, 2);
 
             // Creates a numerical label from 1-99 on the top of the grid
             for (int i = 1; i <= 99; i++)
             {
-                Label label = new Label { Text = i.ToString(), HorizontalTextAlignment = TextAlignment.Center };
+                Label label = new Label { Text = i.ToString(), Padding=10, HorizontalTextAlignment = TextAlignment.Center };
                 grid.Children.Add(label);
-                Grid.SetRow(label, 1);
+                Grid.SetRow(label, 2);
                 Grid.SetColumn(label, i);
             }
 
             // Creates an alphabetical label from A-Z on the side of the grid
 
-            for (int row = 1; row <= 26; row++)
+            for (int row = 3; row < 29; row++)
             {
-                int charIndex = row - 1;
+                int charIndex = row - 3;
                 char labelChar = (char)(charIndex + 65);
 
-                Label label = new Label { Text = labelChar.ToString(), HorizontalTextAlignment = TextAlignment.Center };
+                Label label = new Label { Text = labelChar.ToString(), Padding=10,VerticalTextAlignment=TextAlignment.Center, HorizontalTextAlignment = TextAlignment.Center };
                 grid.Children.Add(label);
-                Grid.SetRow(label, row + 1); // shift row
+                Grid.SetRow(label, row); // shift row
                 Grid.SetColumn(label, 0);
             }
 
             // Creates spreadsheet grid of size 26*99
-            for (int row = 1; row < 27; row++)
+            for (int row = 3; row < 29; row++)
             {
-                for (int column = 1; column < 100; column++)
+                for (int column = 1; column <= 99; column++)
                 {
                     // Create a text box
                     Entry textBox = new Entry
                     {
-                        Placeholder = $"{(char)('A' + row - 1)}{column}",
+                        Placeholder = $"{(char)('A' + row - 3)}{column}",
                         HorizontalOptions = LayoutOptions.FillAndExpand,
                         VerticalOptions = LayoutOptions.FillAndExpand
                     };
+                    textBox.Focus();
                     textBox.Focused += TextBox_TextFocused;
                     textBox.TextChanged += TextBox_TextChanged;
                     textBox.Completed += TextBox_TextCompleted;
 
                     grid.Children.Add(textBox);
                     // Add the text box to the grid
-                    Grid.SetRow(textBox, row + 1);
+                    Grid.SetRow(textBox, row);
                     Grid.SetColumn(textBox, column);
 
                 }
@@ -118,6 +131,8 @@ namespace GUI
                 try
                 {
                     textBox.Text = sp.GetCellValue(cellName).ToString();// makes textbox text the cellvalue of current cellName
+                    
+                    content.Text = sp.GetCellValue(cellName).ToString();
                 }
                 catch (Exception ex)
                 {
@@ -140,7 +155,7 @@ namespace GUI
                 string cellName = textBox.Placeholder;
                 try
                 {
-                    infoLabel.Text = sp.GetCellContents(cellName).ToString();// makes CellInfo label at the top of the spreadsheet display contents of the current cell
+                    content.Text = sp.GetCellContents(cellName).ToString();// makes CellInfo label at the top of the spreadsheet display contents of the current cell
                 }
                 catch (Exception)
                 {
@@ -169,6 +184,7 @@ namespace GUI
                 try
                 {
                     sp.SetContentsOfCell(cellName, textBox.Text);
+                    content.Text = sp.GetCellContents(cellName).ToString();
                 }
                 catch (Exception)
                 {
@@ -203,13 +219,28 @@ namespace GUI
             // Display a prompt dialog for the user to enter the filename
             string filename = await DisplayPromptAsync("Load File", "Enter the filename:");
 
+            if (filename.Contains('.'))
+            {
+                // Get the file extension
+                string extension = filename.Substring(filename.LastIndexOf('.'));
+
+                // Check if the extension is not already ".sprd"
+                if (extension != ".sprd")
+                {
+                    // Replaces the extension in the entered filename with ".sprd"
+                    filename = filename.Substring(0, filename.LastIndexOf('.')) + ".sprd";
+                }
+            }
+            else
+            {
+                // If there is no extension, simply append ".sprd"
+                filename += ".sprd";
+            }
+
             if (filename != null) // If the user entered a filename
             {
                 try
                 {
-                    // Read the contents of the file
-                    string fileContents = File.ReadAllText(filename);
-
                     // creates a new spreadsheet out of the filename entered by the user
                     sp = new Spreadsheet(filename, s => true, s => s.ToUpper(), "six");
 
@@ -234,12 +265,12 @@ namespace GUI
             grid.Children.Clear();
 
             // Create text boxes for each cell in the new spreadsheet
-            for (int row = 1; row < 27; row++)
+            for (int row = 3; row < 29; row++)
             {
-                for (int column = 1; column < 100; column++)
+                for (int column = 1; column <= 99; column++)
                 {
                     // Get the cell name based on the current row and column
-                    string cellName = $"{(char)('A' + row - 1)}{column}";
+                    string cellName = $"{(char)('A' + row - 3)}{column}";
 
                     // Create a text box
                     Entry textBox = new Entry
@@ -260,9 +291,9 @@ namespace GUI
 
                 }
             }
-            grid.Children.Add(infoLabel);// add the cellInfo label to grid
-            Grid.SetRow(infoLabel, 0);
-            Grid.SetColumn(infoLabel, 0);
+            grid.Children.Add(content);// add the cellInfo label to grid
+            Grid.SetRow(content, 0);
+            Grid.SetColumn(content, 0);
         }
 
         /// <summary>
@@ -272,14 +303,62 @@ namespace GUI
         /// <param name="e"></param>
         async void FileMenuSave(object sender, EventArgs e)
         {
+            await Permissions.RequestAsync<Permissions.StorageWrite>();
+
             string filename = await DisplayPromptAsync("Save File", "Enter the filename:");
 
-            if (filename != null)
+            // Check if the input contains a file extension
+            if (filename.Contains('.'))
+            {
+                // Get the file extension
+                string extension = filename.Substring(filename.LastIndexOf('.'));
+
+                // Check if the extension is not already ".sprd"
+                if (extension != ".sprd")
+                {
+                    // Replaces the extension in the entered filename with ".sprd"
+                    filename = filename.Substring(0, filename.LastIndexOf('.')) + ".sprd";
+                }
+            }
+            else
+            {
+                // If there is no extension, simply append ".sprd"
+                filename += ".sprd";
+            }
+
+
+            FileOptions options = new FileOptions();
+            FileResult fileResult = await FilePicker.PickAsync(new PickOptions
+            {
+                PickerTitle = "Save File",                
+            });
+
+            string directoryPath = null;
+            if (fileResult != null)
+            {
+                directoryPath = Path.GetDirectoryName(fileResult.FullPath);
+            }
+            else
+            {
+                // Display an alert indicating that the file was not saved
+                await DisplayAlert("File Not Saved", "The file was not saved.", "OK");
+                return;
+            }
+
+            string filepath = Path.Combine(directoryPath, filename);
+
+            if (!Directory.Exists(directoryPath))
+            {
+                await DisplayAlert("Error", $"The specified directory '{directoryPath}' does not exist.", "OK");
+                return;
+            }
+
+            if (filepath != null)
             {
                 try
                 {
                     // Call the Save method of your Spreadsheet class, passing the entered filename
-                    sp.Save(filename);
+                    sp.Save(filepath);
                     await DisplayAlert("File Saved", "The file has been saved successfully.", "OK");
                 }
                 catch (SpreadsheetReadWriteException ex)
@@ -303,5 +382,38 @@ namespace GUI
                
             }
         }
+
+        /// <summary>
+        ///  HelpMenu method is an event handler method that is invoked when user clicks on Help section and on About section in the Help menu
+        ///  that generates a display alert giving information about the spreadsheet about how to enter inputs into a cell in the spreadsheet as well as
+        ///  editing the information entered
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void HelpMenu(object sender, EventArgs e)
+        {
+            DisplayAlert("HELP", "This is a spreadsheet program. User can enter information into each cell, " +
+                "if it is a formula which starts with =, user can press enter to see the calculated result, if the user entered a valid formula." +
+                "users are able to press new to refresh the spreadsheet, they are also able to save the spreadsheet, and load the spreasheet from a " +
+                "previously saved spreadsheet. Users can click on each cell to see the contents of each cell.", "OK");
+        }
+
+        /// <summary>
+        ///   Shows how to "push" a new "window" on top of the old and then
+        ///   revert.  This is one way to go about the help page implementation.
+        ///   
+        ///   <para>
+        ///     Notice that this recreates a page in code every time... You should either
+        ///     only do this once, or have another xaml widget to use....
+        ///   </para>
+        /// </summary>
+        /// <param name="sender"> ignored </param>
+        /// <param name="e"> ignored </param>
+        void HelpInformation(object sender, EventArgs e)
+        {
+            var page = new HelpPage();
+            Navigation.PushAsync(page, true);
+        }
     }
+
 }
