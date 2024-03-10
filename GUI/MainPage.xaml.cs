@@ -383,20 +383,6 @@ namespace GUI
             }
         }
 
-        /// <summary>
-        ///  HelpMenu method is an event handler method that is invoked when user clicks on Help section and on About section in the Help menu
-        ///  that generates a display alert giving information about the spreadsheet about how to enter inputs into a cell in the spreadsheet as well as
-        ///  editing the information entered
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void HelpMenu(object sender, EventArgs e)
-        {
-            DisplayAlert("HELP", "This is a spreadsheet program. User can enter information into each cell, " +
-                "if it is a formula which starts with =, user can press enter to see the calculated result, if the user entered a valid formula." +
-                "users are able to press new to refresh the spreadsheet, they are also able to save the spreadsheet, and load the spreasheet from a " +
-                "previously saved spreadsheet. Users can click on each cell to see the contents of each cell.", "OK");
-        }
 
         /// <summary>
         ///   Shows how to "push" a new "window" on top of the old and then
