@@ -396,3 +396,7 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+#Ignoring GradingTests
+AS4_GradingTests/
+AS5_GradingTests/
