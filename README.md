@@ -1,6 +1,6 @@
 ﻿
 Author     :  Rohith Veeramachaneni
-Partner    :  None
+Partner    :  Seongjin Hwang
 Start date :  Janaury 19,2024
 Course     :  CS 3500 - University of Utah,School of Computing
 Github ID  :  Rohith0221
@@ -9,7 +9,7 @@ Commit date : Feb 11 -2024
 Commit time : 11:00 pm
 Solution    : Spreadsheet
 
-Copyright:  CS 3500 and Rohith Veeramachaneni - This work may not be copied for use in Academic Coursework.
+Copyright:  CS 3500 and Rohith Veeramachaneni and Seongjin Hwang - This work may not be copied for use in Academic Coursework.
 
 
 # Overview of the Spreadsheet functionality
